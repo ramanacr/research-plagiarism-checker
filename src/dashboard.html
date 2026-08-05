@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confidential Research Plagiarism & Similarity Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e17;
+            --bg-card: rgba(22, 28, 45, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.15);
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.15);
+            --warning: #f59e0b;
+            --warning-glow: rgba(245, 158, 11, 0.15);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.15);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.04) 0%, transparent 40%);
+        }
+
+        header {
+            padding: 24px 40px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(10, 14, 23, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--success));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .logo-text h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text p {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .badge {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        main {
+            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .glass-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Upload Container styles */
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 48px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            background: rgba(255, 255, 255, 0.01);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.03);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+
+        .upload-area:hover .upload-icon {
+            transform: translateY(-4px);
+        }
+
+        .upload-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .upload-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .btn:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        /* Progress Steps Overlay */
+        .loading-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            padding: 40px 0;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-steps {
+            max-width: 400px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .step-item.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .step-item.completed {
+            color: var(--success);
+        }
+
+        .step-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        /* Results dashboard */
+        .results-container {
+            display: none;
+            flex-direction: column;
+            gap: 32px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-header-summary {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 32px;
+        }
+
+        @media (max-width: 768px) {
+            .results-header-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Risk Gauge Card */
+        .risk-gauge-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .risk-circle {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .circle-svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 12;
+        }
+
+        .circle-progress {
+            fill: none;
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 440;
+            stroke-dashoffset: 440;
+            transition: stroke-dashoffset 1s ease-in-out;
+        }
+
+        .risk-text-center {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .risk-percentage {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .risk-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .risk-badge {
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .risk-HIGH {
+            background-color: var(--danger-glow);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .risk-MODERATE {
+            background-color: var(--warning-glow);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .risk-LOW {
+            background-color: var(--success-glow);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        /* Metadata & Audit details */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Audit Panel */
+        .audit-panel {
+            background: rgba(99, 102, 241, 0.04);
+            border: 1px dashed rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .audit-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .keyword-pill {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 12px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        /* Tabs and Details lists */
+        .tab-menu {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+            gap: 24px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 16px;
+            font-weight: 600;
+            padding-bottom: 12px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--text-main);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .match-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: transform 0.2s ease;
+        }
+
+        .match-card:hover {
+            transform: translateX(4px);
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            gap: 16px;
+        }
+
+        .match-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .match-score-badge {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .match-details {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .match-details span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .side-by-side {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .side-by-side {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sentence-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .sentence-box-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .sentence-text {
+            color: #d1d5db;
+        }
+
+        .highlight-text {
+            background-color: rgba(239, 68, 68, 0.2);
+            border-bottom: 1.5px solid var(--danger);
+            color: #fff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 36px;
+            margin-bottom: 16px;
+        }
+
+        .reset-container {
+            margin-top: 24px;
+            display: flex;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">C</div>
+            <div class="logo-text">
+                <h1>Research Plagiarism Checker</h1>
+                <p>Secure local-first analysis (PubMed & Europe PMC)</p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 16px; align-items: center;">
+            <button id="header-reset-btn" class="btn" style="display: none; padding: 6px 16px; font-size: 13px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-main); box-shadow: none;" onclick="resetAnalyzer()">Analyze Another Document</button>
+            <div class="badge">
+                <span class="badge-dot"></span>
+                Strict Guardrails Active
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Document Upload Section -->
+        <div id="upload-panel" class="glass-card">
+            <div class="upload-area" id="drop-zone">
+                <span class="upload-icon">📄</span>
+                <h2 class="upload-title">Confidential File Upload</h2>
+                <p class="upload-subtitle">Drag and drop your PDF, DOCX or TXT file here. The document content is processed entirely in memory and never leaves this machine.</p>
+                <button class="btn" onclick="document.getElementById('file-input').click()">Select File</button>
+                <input type="file" id="file-input" accept=".pdf,.docx,.doc,.txt">
+            </div>
+
+            <!-- Scanning Status Display -->
+            <div class="loading-container" id="loading-panel">
+                <div class="spinner"></div>
+                <h3>Processing Document Confidentiality</h3>
+                <p style="color: var(--text-muted); font-size: 14px;">Executing local analysis sandboxed from internet</p>
+                <div class="loading-steps">
+                    <div class="step-item" id="step-extract"><span class="step-icon">1</span> Extracting document text locally</div>
+                    <div class="step-item" id="step-anonymize"><span class="step-icon">2</span> Sanitizing content and extracting metadata keywords</div>
+                    <div class="step-item" id="step-pubmed"><span class="step-icon">3</span> Searching Life-Sciences Databases (PubMed & Europe PMC)</div>
+                    <div class="step-item" id="step-similarity"><span class="step-icon">4</span> Running SentenceTransformers & shingling similarity engine</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Results Section -->
+        <div id="results-panel" class="results-container">
+            <div class="results-header-summary">
+                
+                <!-- Risk Gauge Card -->
+                <div class="glass-card risk-gauge-card">
+                    <h3 style="margin-bottom: 20px; font-size: 16px; font-weight: 600;">Overall Risk Assessment</h3>
+                    <div class="risk-circle">
+                        <svg class="circle-svg">
+                            <circle class="circle-bg" cx="80" cy="80" r="70"></circle>
+                            <circle class="circle-progress" id="progress-ring" cx="80" cy="80" r="70" stroke="var(--primary)"></circle>
+                        </svg>
+                        <div class="risk-text-center">
+                            <span class="risk-percentage" id="risk-pct-text">0%</span>
+                            <span class="risk-label">Similarity</span>
+                        </div>
+                    </div>
+                    <div class="risk-badge" id="risk-status-badge">LOW</div>
+                </div>
+
+                <!-- Document Info & Guardrails verification -->
+                <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <h3 style="margin-bottom: 16px; font-size: 16px; font-weight: 600;">Analysis Details</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">File Name</div>
+                                <div class="info-value" id="info-filename">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Total Word Count</div>
+                                <div class="info-value" id="info-words">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Sentences Evaluated</div>
+                                <div class="info-value" id="info-sentences">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Processing Time</div>
+                                <div class="info-value" id="info-time">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leak-Proof Audit Log -->
+                    <div class="audit-panel">
+                        <div class="audit-title">
+                            <span>🛡️</span> Data Privacy & Leak Audit
+                        </div>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+                            The following anonymized keywords represent the <b>only</b> data transmitted to external servers (NCBI PubMed & Europe PMC) to find matching articles:
+                        </p>
+                        <div id="audit-keywords">
+                            <!-- Keywords pills will render here -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Tabbed Comparison lists -->
+            <div class="glass-card">
+                <div class="tab-menu">
+                    <button class="tab-btn active" onclick="switchTab(event, 'semantic-tab')">Semantic Paraphrasing Check (<span id="count-semantic">0</span>)</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'verbatim-tab')">Verbatim Text Copying (<span id="count-verbatim">0</span>)</button>
+                </div>
+
+                <!-- Semantic Paraphrase matches -->
+                <div class="tab-content active" id="semantic-tab">
+                    <div id="semantic-matches-list">
+                        <!-- Matches injected here -->
+                    </div>
+                </div>
+
+                <!-- Verbatim Copy-Paste matches -->
+                <div class="tab-content" id="verbatim-tab">
+                    <div id="verbatim-matches-list">
+                        <!-- Matches injected here -->
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </main>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const uploadPanel = document.getElementById('upload-panel');
+        const loadingPanel = document.getElementById('loading-panel');
+        const resultsPanel = document.getElementById('results-panel');
+
+        // Drag and drop events
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+            }, false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (fileInput.files.length) {
+                handleFile(fileInput.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            // Show loading panel, hide upload zone
+            document.getElementById('drop-zone').style.display = 'none';
+            loadingPanel.style.display = 'flex';
+            
+            updateStepsProgress();
+            
+            // Build Form Data
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            fetch('/api/analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Analysis request failed');
+                return res.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    showResults(data);
+                } else {
+                    alert('Error: ' + data.error);
+                    resetAnalyzer();
+                }
+            })
+            .catch(err => {
+                alert('Connection error or analysis failure: ' + err.message);
+                resetAnalyzer();
+            });
+        }
+
+        function updateStepsProgress() {
+            const steps = [
+                { id: 'step-extract', delay: 100 },
+                { id: 'step-anonymize', delay: 800 },
+                { id: 'step-pubmed', delay: 1800 },
+                { id: 'step-similarity', delay: 2800 }
+            ];
+            
+            steps.forEach(step => {
+                setTimeout(() => {
+                    const el = document.getElementById(step.id);
+                    if (el) {
+                        el.classList.add('active');
+                        // Complete previous step
+                        if (step.id === 'step-anonymize') document.getElementById('step-extract').classList.add('completed');
+                        if (step.id === 'step-pubmed') document.getElementById('step-anonymize').classList.add('completed');
+                        if (step.id === 'step-similarity') document.getElementById('step-pubmed').classList.add('completed');
+                    }
+                }, step.delay);
+            });
+        }
+
+        function showResults(data) {
+            loadingPanel.style.display = 'none';
+            uploadPanel.style.display = 'none';
+            resultsPanel.style.display = 'flex';
+            document.getElementById('header-reset-btn').style.display = 'block';
+            
+            // Set file meta
+            document.getElementById('info-filename').innerText = data.metadata.filename;
+            document.getElementById('info-words').innerText = data.metadata.word_count.toLocaleString();
+            document.getElementById('info-sentences').innerText = data.metadata.sentences_analyzed.toLocaleString();
+            document.getElementById('info-time').innerText = data.metadata.execution_time_seconds + ' s';
+            
+            // Set keywords pills
+            const keywordsDiv = document.getElementById('audit-keywords');
+            keywordsDiv.innerHTML = '';
+            data.guardrails.anonymized_search_keywords.forEach(kw => {
+                const span = document.createElement('span');
+                span.className = 'keyword-pill';
+                span.innerText = kw;
+                keywordsDiv.appendChild(span);
+            });
+            if (data.guardrails.anonymized_search_keywords.length === 0) {
+                keywordsDiv.innerHTML = '<span style="font-size:12px; color:var(--text-muted)">No keywords extracted (document too small or contains no technical nouns).</span>';
+            }
+
+            // Set Risk assessment
+            const maxVerbatim = data.results.max_verbatim_score;
+            const maxSemantic = data.results.max_semantic_score;
+            const overallPercentage = Math.round(Math.max(maxVerbatim, maxSemantic) * 100);
+            
+            document.getElementById('risk-pct-text').innerText = overallPercentage + '%';
+            
+            // Set Progress circle ring
+            const ring = document.getElementById('progress-ring');
+            const radius = ring.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (overallPercentage / 100) * circumference;
+            
+            // Color mapping based on risk rating
+            let riskColor = 'var(--success)';
+            let riskGlow = 'var(--success-glow)';
+            if (data.results.risk_level === 'HIGH') {
+                riskColor = 'var(--danger)';
+                riskGlow = 'var(--danger-glow)';
+            } else if (data.results.risk_level === 'MODERATE') {
+                riskColor = 'var(--warning)';
+                riskGlow = 'var(--warning-glow)';
+            }
+            
+            ring.style.stroke = riskColor;
+            ring.style.strokeDasharray = circumference;
+            ring.style.strokeDashoffset = offset;
+            
+            const badge = document.getElementById('risk-status-badge');
+            badge.className = 'risk-badge risk-' + data.results.risk_level;
+            badge.innerText = data.results.risk_level + ' RISK';
+            
+            // Render list counters
+            document.getElementById('count-semantic').innerText = data.results.semantic_similarity_flags.length;
+            document.getElementById('count-verbatim').innerText = data.results.verbatim_plagiarism_flags.length;
+            
+            // Render Semantic matches
+            const semDiv = document.getElementById('semantic-matches-list');
+            semDiv.innerHTML = '';
+            if (data.results.semantic_similarity_flags.length === 0) {
+                semDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛡️</div>
+                        <h4>No Semantic Overlaps Found</h4>
+                        <p>No matching academic publication abstracts found that exhibit paraphrased similarity.</p>
+                    </div>`;
+            } else {
+                const uncitedMatches = data.results.semantic_similarity_flags.filter(m => !m.is_cited);
+                const citedMatches = data.results.semantic_similarity_flags.filter(m => m.is_cited);
+
+                const renderSection = (matchesList, title, isCitedSection) => {
+                    if (matchesList.length === 0) return '';
+                    
+                    let html = `<h4 style="margin: 24px 0 12px 0; color: ${isCitedSection ? 'var(--success)' : (riskColor === 'var(--danger)' ? 'var(--danger)' : 'var(--warning)')}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${title} (${matchesList.length})</h4>`;
+                    
+                    matchesList.forEach(match => {
+                        const cardBg = isCitedSection ? 'rgba(16, 185, 129, 0.03)' : 'rgba(255, 255, 255, 0.02)';
+                        const cardBorder = isCitedSection ? 'rgba(16, 185, 129, 0.2)' : 'var(--border-color)';
+                        const badgeBg = isCitedSection ? 'rgba(16, 185, 129, 0.1)' : riskGlow;
+                        const badgeColor = isCitedSection ? 'var(--success)' : riskColor;
+                        const highlightStyle = isCitedSection ? 'style="background-color: rgba(16, 185, 129, 0.2); border-bottom: 1.5px solid var(--success); color: #fff;"' : 'class="highlight-text"';
+                        
+                        html += `
+                            <div class="match-card" style="background: ${cardBg}; border-color: ${cardBorder};">
+                                <div class="match-header">
+                                    <h4 class="match-title">${match.title}</h4>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        ${isCitedSection ? `<span class="match-score-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.2)">Already Cited</span>` : ''}
+                                        <span class="match-score-badge" style="background: ${badgeBg}; color: ${badgeColor}; border-color: rgba(${isCitedSection ? '16, 185, 129' : (riskColor === 'var(--danger)' ? '239,68,68' : '245,158,11')}, 0.2)">
+                                            ${Math.round(match.score * 100)}% Similarity
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="match-details">
+                                    <span><b>PMID:</b> ${match.pmid}</span>
+                                    <span><b>Journal:</b> ${match.journal} (${match.pub_date})</span>
+                                    ${match.doi ? `<span><b>DOI:</b> <a href="https://doi.org/${match.doi}" target="_blank" style="color:var(--primary);text-decoration:none;">${match.doi}</a></span>` : ''}
+                                </div>
+                                <div class="side-by-side">
+                                    <div class="sentence-box">
+                                        <div class="sentence-box-label">Your Document Sentence</div>
+                                        <div class="sentence-text" ${highlightStyle}>${match.source_sentence}</div>
+                                    </div>
+                                    <div class="sentence-box">
+                                        <div class="sentence-box-label">Matching Database Sentence</div>
+                                        <div class="sentence-text" ${highlightStyle}>${match.matching_sentence}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    return html;
+                };
+
+                let content = '';
+                content += renderSection(uncitedMatches, 'Uncited Overlaps (Requires Review)', false);
+                content += renderSection(citedMatches, 'Cited Overlaps (Legitimate Citations)', true);
+                semDiv.innerHTML = content;
+            }
+
+            // Render Verbatim matches
+            const verbDiv = document.getElementById('verbatim-matches-list');
+            verbDiv.innerHTML = '';
+            if (data.results.verbatim_plagiarism_flags.length === 0) {
+                verbDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✓</div>
+                        <h4>No Copy-Paste Plagiarism Flagged</h4>
+                        <p>No verbatim word sequences matching academic databases were detected.</p>
+                    </div>`;
+            } else {
+                const uncitedVerb = data.results.verbatim_plagiarism_flags.filter(m => !m.is_cited);
+                const citedVerb = data.results.verbatim_plagiarism_flags.filter(m => m.is_cited);
+
+                const renderVerbSection = (matchesList, title, isCitedSection) => {
+                    if (matchesList.length === 0) return '';
+                    
+                    let html = `<h4 style="margin: 24px 0 12px 0; color: ${isCitedSection ? 'var(--success)' : 'var(--danger)'}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${title} (${matchesList.length})</h4>`;
+                    
+                    matchesList.forEach(match => {
+                        const cardBg = isCitedSection ? 'rgba(16, 185, 129, 0.03)' : 'rgba(255, 255, 255, 0.02)';
+                        const cardBorder = isCitedSection ? 'rgba(16, 185, 129, 0.2)' : 'var(--border-color)';
+                        const highlightStyle = isCitedSection ? 'style="background-color: rgba(16, 185, 129, 0.2); border-bottom: 1.5px solid var(--success); color: #fff; font-family:monospace; font-size:13px;"' : 'class="highlight-text" style="font-family:monospace; font-size:13px;"';
+
+                        const phrasesHtml = match.matching_phrases.map(phrase => 
+                            `<div class="sentence-box" style="margin-top:10px;">
+                                <div class="sentence-box-label">Verbatim Sequence Detected</div>
+                                <span ${highlightStyle}>"${phrase}"</span>
+                             </div>`
+                        ).join('');
+
+                        const scorePct = Math.round(match.jaccard_score * 100);
+                        const scoreText = (scorePct === 0 && match.matching_phrases.length > 0) ? "< 1%" : scorePct + "%";
+
+                        html += `
+                            <div class="match-card" style="background: ${cardBg}; border-color: ${cardBorder};">
+                                <div class="match-header">
+                                    <h4 class="match-title">${match.title}</h4>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        ${isCitedSection ? `<span class="match-score-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.2)">Already Cited</span>` : ''}
+                                        <span class="match-score-badge" style="background: ${isCitedSection ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; color: ${isCitedSection ? 'var(--success)' : 'var(--danger)'}; border-color: rgba(${isCitedSection ? '16, 185, 129' : '239, 68, 68'}, 0.2)">
+                                            ${scoreText} Verbatim Overlap
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="match-details">
+                                    <span><b>PMID:</b> ${match.pmid}</span>
+                                    ${match.doi ? `<span><b>DOI:</b> <a href="https://doi.org/${match.doi}" target="_blank" style="color:var(--primary);text-decoration:none;">${match.doi}</a></span>` : ''}
+                                </div>
+                                <p style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">Overlapping word shingles:</p>
+                                ${phrasesHtml}
+                            </div>
+                        `;
+                    });
+                    return html;
+                };
+
+                let content = '';
+                content += renderVerbSection(uncitedVerb, 'Uncited Verbatim Matches (Potential Plagiarism)', false);
+                content += renderVerbSection(citedVerb, 'Cited Verbatim Matches (Standard References)', true);
+                verbDiv.innerHTML = content;
+            }
+        }
+
+        function switchTab(evt, tabId) {
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+            
+            const tabButtons = document.getElementsByClassName('tab-btn');
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove('active');
+            }
+            
+            document.getElementById(tabId).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        function resetAnalyzer() {
+            resultsPanel.style.display = 'none';
+            loadingPanel.style.display = 'none';
+            document.getElementById('header-reset-btn').style.display = 'none';
+            uploadPanel.style.display = 'block';
+            document.getElementById('drop-zone').style.display = 'block';
+            fileInput.value = '';
+            
+            // Clean active classes
+            document.querySelectorAll('.step-item').forEach(el => {
+                el.classList.remove('active', 'completed');
+            });
+        }
+    </script>
+</body>
+</html>

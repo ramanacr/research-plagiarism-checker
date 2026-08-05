@@ -1,0 +1,134 @@
+{
+  "status": "success",
+  "metadata": {
+    "filename": "user_document.txt",
+    "word_count": 1067,
+    "sentences_analyzed": 45,
+    "execution_time_seconds": 8.6
+  },
+  "guardrails": {
+    "anonymized_search_keywords": [
+      "sodium",
+      "tenapanor",
+      "kidney",
+      "stool",
+      "inhibitors",
+      "rats",
+      "intestine",
+      "data"
+    ],
+    "external_pmids_queried": [
+      "42471818",
+      "42418353",
+      "42387036",
+      "42074321",
+      "42027201",
+      "41993686",
+      "41498065",
+      "40362897",
+      "39998332",
+      "39702842"
+    ],
+    "confidentiality_status": "VERIFIED (0% original text sent to external APIs)"
+  },
+  "results": {
+    "risk_level": "HIGH",
+    "max_verbatim_score": 0.001,
+    "max_semantic_score": 0.789,
+    "verbatim_plagiarism_flags": [
+      {
+        "pmid": "42387036",
+        "title": "Tenapanor reduces phosphate binder pill burden among hemodialysis patients in a post hoc phase 3 analysis.",
+        "jaccard_score": 0.001,
+        "matching_phrases": [
+          "sodium hydrogen exchanger isoform 3 in"
+        ],
+        "doi": "10.1038/s41598-026-58594-9"
+      },
+      {
+        "pmid": "42074321",
+        "title": "Analysis of Phosphate Transporters in Peritoneal Cells and Tissues and Their Transport Kinetics In Vitro.",
+        "jaccard_score": 0.001,
+        "matching_phrases": [
+          "in patients with chronic kidney disease"
+        ],
+        "doi": "10.3390/ijms27083683"
+      },
+      {
+        "pmid": "41498065",
+        "title": "Mechanism of reduced intestinal phosphate absorption by tenapanor: a hypothesis.",
+        "jaccard_score": 0.001,
+        "matching_phrases": [
+          "sodium hydrogen exchanger isoform 3"
+        ],
+        "doi": "10.1093/ckj/sfaf375"
+      }
+    ],
+    "semantic_similarity_flags": [
+      {
+        "source_sentence": "[45] indicate that highly bioavailable inhibitors of NHE3 are significantly less active in the gastro intestinal tract than versions with minimal systemic exposure.",
+        "matching_sentence": "However, the precise mechanisms underlying NHE3 inhibition, its impact on phosphate handling and the primary site of action within the gastrointestinal tract remain incompletely understood.",
+        "score": 0.789,
+        "pmid": "41498065",
+        "title": "Mechanism of reduced intestinal phosphate absorption by tenapanor: a hypothesis.",
+        "doi": "10.1093/ckj/sfaf375",
+        "authors": [
+          "Takeshi Nakanishi",
+          "Tilman B Drueke",
+          "Takahiro Kuragano"
+        ],
+        "journal": "Clinical kidney journal",
+        "pub_date": "2026 Jan"
+      },
+      {
+        "source_sentence": "Similar results were reported in healthy human volunteers, in whom Tenapanor waswell tolerated .",
+        "matching_sentence": "We conducted a systematic review and meta-analysis to evaluate the efficacy and safety of tenapanor.",
+        "score": 0.767,
+        "pmid": "39702842",
+        "title": "Efficacy and safety of tenapanor vs placebo in treating CKD patients on dialysis and with hyperphosphatemia: a systematic review and meta-analysis of 2251 patients.",
+        "doi": "10.1007/s11255-024-04316-x",
+        "authors": [
+          "Ahmed A Abo Elnaga",
+          "Ibrahim Serag",
+          "Mohamed A Alsaied",
+          "Basma Badrawy Khalefa",
+          "Jaisingh Rajput",
+          "Shrouk Ramadan",
+          "Abdelrahman M Elettreby"
+        ],
+        "journal": "International urology and nephrology",
+        "pub_date": "2025 Jun"
+      },
+      {
+        "source_sentence": "Taken in sum and as reviewed below, data from multiple laboratories support a mechanism of action in which inhibitors of NHE3 act locally in the gut to reduce intestinal sodium uptake (Fig. 1).",
+        "matching_sentence": "However, the precise mechanisms underlying NHE3 inhibition, its impact on phosphate handling and the primary site of action within the gastrointestinal tract remain incompletely understood.",
+        "score": 0.761,
+        "pmid": "41498065",
+        "title": "Mechanism of reduced intestinal phosphate absorption by tenapanor: a hypothesis.",
+        "doi": "10.1093/ckj/sfaf375",
+        "authors": [
+          "Takeshi Nakanishi",
+          "Tilman B Drueke",
+          "Takahiro Kuragano"
+        ],
+        "journal": "Clinical kidney journal",
+        "pub_date": "2026 Jan"
+      },
+      {
+        "source_sentence": "In mammals, NHE3 is expressed primarily in the kidney and the gastrointestinal tract.",
+        "matching_sentence": "However, the precise mechanisms underlying NHE3 inhibition, its impact on phosphate handling and the primary site of action within the gastrointestinal tract remain incompletely understood.",
+        "score": 0.75,
+        "pmid": "41498065",
+        "title": "Mechanism of reduced intestinal phosphate absorption by tenapanor: a hypothesis.",
+        "doi": "10.1093/ckj/sfaf375",
+        "authors": [
+          "Takeshi Nakanishi",
+          "Tilman B Drueke",
+          "Takahiro Kuragano"
+        ],
+        "journal": "Clinical kidney journal",
+        "pub_date": "2026 Jan"
+      }
+    ]
+  }
+}

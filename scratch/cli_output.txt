@@ -1,0 +1,44 @@
+
+============================================================
+  SECURE PLAGIARISM & SIMILARITY AUDIT REPORT
+============================================================
+File Name:            user_document.txt
+Word Count:           1067
+Sentences Analyzed:   45
+Execution Time:       8.6 seconds
+------------------------------------------------------------
+[SECURE] DATA CONFIDENTIALITY AUDIT LOG
+Status:               VERIFIED (0% original text sent to external APIs)
+Anonymized Search Terms Sent Out:
+  'sodium', 'tenapanor', 'kidney', 'stool', 'inhibitors', 'rats', 'intestine', 'data'
+Matching PubMed PMIDs: 42471818, 42418353, 42387036, 42074321, 42027201, 41993686, 41498065, 40362897, 39998332, 39702842
+------------------------------------------------------------
+[RISK] PLAGIARISM & SIMILARITY RISK ASSESSMENT
+Overall Risk Level:   [91mHIGH RISK[0m
+Max Verbatim Match:   0%
+Max Semantic Match:   78%
+------------------------------------------------------------
+
+[!] Flagged 3 Verbatim Matches:
+  - PMID 42387036 (Tenapanor reduces phosphate binder pill burden amo...): Jaccard Score 0%
+    Verbatim overlap: "sodium hydrogen exchanger isoform 3 in"
+  - PMID 42074321 (Analysis of Phosphate Transporters in Peritoneal C...): Jaccard Score 0%
+    Verbatim overlap: "in patients with chronic kidney disease"
+  - PMID 41498065 (Mechanism of reduced intestinal phosphate absorpti...): Jaccard Score 0%
+    Verbatim overlap: "sodium hydrogen exchanger isoform 3"
+
+[!] Flagged 4 Semantic Overlaps:
+  - PMID 41498065 (Mechanism of reduced intestinal phosphate absorpti...): Similarity 78%
+    Source:   "[45] indicate that highly bioavailable inhibitors of NHE3 are significantly less active in the gastro intestinal tract than versions with minimal systemic exposure."
+    Matching: "However, the precise mechanisms underlying NHE3 inhibition, its impact on phosphate handling and the primary site of action within the gastrointestinal tract remain incompletely understood."
+  - PMID 39702842 (Efficacy and safety of tenapanor vs placebo in tre...): Similarity 76%
+    Source:   "Similar results were reported in healthy human volunteers, in whom Tenapanor waswell tolerated ."
+    Matching: "We conducted a systematic review and meta-analysis to evaluate the efficacy and safety of tenapanor."
+  - PMID 41498065 (Mechanism of reduced intestinal phosphate absorpti...): Similarity 76%
+    Source:   "Taken in sum and as reviewed below, data from multiple laboratories support a mechanism of action in which inhibitors of NHE3 act locally in the gut to reduce intestinal sodium uptake (Fig. 1)."
+    Matching: "However, the precise mechanisms underlying NHE3 inhibition, its impact on phosphate handling and the primary site of action within the gastrointestinal tract remain incompletely understood."
+  - PMID 41498065 (Mechanism of reduced intestinal phosphate absorpti...): Similarity 75%
+    Source:   "In mammals, NHE3 is expressed primarily in the kidney and the gastrointestinal tract."
+    Matching: "However, the precise mechanisms underlying NHE3 inhibition, its impact on phosphate handling and the primary site of action within the gastrointestinal tract remain incompletely understood."
+============================================================
+
