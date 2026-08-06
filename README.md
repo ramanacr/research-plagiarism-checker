@@ -1,254 +1,141 @@
-# Secure & Confidential Research Plagiarism & Similarity Engine
+# Secure Academic Research Suite & Attention Analytics Engine
 
-A secure, local-first academic plagiarism and semantic similarity checker designed specifically for confidential documents. This tool evaluates research papers against PubMed and Europe PMC databases without ever leaking the original text or phrasing to the external network.
-
----
-
-## 🛡️ Core Confidentiality Guardrails
-
-To ensure that the uploaded document **never reaches the outside world** and is not mixed across sessions, the system enforces the following security boundaries:
-
-1. **Local-First Processing**: Text parsing, sentence tokenization, vector embedding generation, and Jaccard shingle comparisons are executed entirely on local CPU/GPU memory. No external LLM or AI cloud APIs are used.
-2. **In-Memory Ephemeral Storage**: Uploaded files are processed in-memory. Raw document texts are never persisted to disk or databases.
-3. **Anonymized External Queries**: The system never sends sentences, paragraphs, or grammatical fragments to search indexes. Instead, it runs local Named Entity Recognition (NER) to extract isolated keywords (e.g., drug names, genes, diseases). 
-4. **Leak-Proof Query Construction**: Extracted keywords are strictly validated: no phrase is allowed to be longer than 3 words, and all common pronouns, verbs, and PII are stripped. Only these anonymous technical concepts are sent to NCBI PubMed and Europe PMC APIs to discover candidate matching articles.
+A secure, local-first academic plagiarism engine combined with an automated Digital Footprint & Attention Analytics crawler. This portal provides research integrity checks and tracks citation analytics against global registries (PubMed, Europe PMC, Crossref, and OpenAlex) in a unified interface.
 
 ---
 
-## 🏗️ Technical Architecture & Data Flow
+## 🏛️ Navigation Portal (Pre-Page Hub)
 
-The following diagram illustrates the security boundary separating local computations from the external web:
+The suite is served via a responsive landing pre-page containing visual navigation tiles and immediate redirection.
+
+*   **Portal entrance**: served at `http://127.0.0.1:8000/` (`/`)
+*   **Sub-interfaces**:
+    *   **Plagiarism Checker**: Served at `/plagiarism` (features a sticky header reset to analyze another document easily).
+    *   **Attention & Citation Analytics**: Served at `/attention` (features search, polling alerts, D3.js charts, and manual crawler triggers).
+*   **Back controls**: Both interfaces contain prominent `"Portal Hub"` back links to return to the landing pre-page instantly.
+
+---
+
+## 🛡️ Core Confidentiality Guardrails (Plagiarism Checker)
+
+To ensure that uploaded documents **never reach the outside world** during similarity checks, the system enforces strict local sandboxing:
+
+1.  **Local-First Processing**: Document parsing, sentence segmentation, and vector embeddings (`SentenceTransformers`) are generated entirely on local memory.
+2.  **Anonymized Entity Search**: The system extracts technical keywords (e.g. drug/gene names) using local spaCy NER. Only these anonymous technical concepts are sent to PubMed and Europe PMC APIs to locate matching publications.
+3.  **Smart Citation Filter**: LEGITIMATE citations containing author names or DOIs listed in the text are classified separately and **excluded from plagiarism risk score calculations**.
+
+---
+
+## 📊 Research Attention Analytics Module
+
+The Research Attention module tracks citations and digital mentions of resolved publications across digital channels (e.g. Wikipedia).
 
 ```mermaid
 graph TD
-    User([User Client / Browser]) -->|Uploads Document| API[FastAPI Local Server]
+    User([User Client]) -->|Queries PMID/DOI| API[FastAPI Server]
+    API -->|1. Resolve Metadata| Resolver[Work Resolver]
     
-    subgraph Secure Local Sandbox [Local Compute Boundary]
-        API -->|In-Memory Processing| Extractor[Document Extractor]
-        Extractor -->|Sentence Tokenization| Sentences[Document Sentences]
-        Extractor -->|Local NER spacy| Keywords[Sanitized Technical Keywords]
-        
-        Sentences -->|Local SentenceTransformers| DocEmbeds[(Local Document Embeddings)]
-        
-        LocalSimilarity[Similarity & Plagiarism Engine]
-        DocEmbeds --> LocalSimilarity
-        CandEmbeds[(Local Candidate Embeddings)] --> LocalSimilarity
-    end
-
-    subgraph External Network [Public APIs]
-        Keywords -->|Send Sanitized Keywords Only| NCBI[NCBI PubMed API]
-        Keywords -->|Send Sanitized Keywords Only| EPMC[Europe PMC API]
-        NCBI -->|Return PMIDs| Fetcher[Candidate Metadata Downloader]
-        EPMC -->|Return PMIDs & Abstracts| Fetcher
+    subgraph Identity Resolution Chain
+        Resolver -->|PubMed| PM[PubMed E-Utilities]
+        Resolver -->|Europe PMC| EPMC[Europe PMC Search]
+        Resolver -->|Crossref| CR[Crossref Works]
+        Resolver -->|OpenAlex| OA[OpenAlex Works API]
     end
     
-    Fetcher -->|Deduplicated Abstracts| Extractor2[Local Abstract Parser]
-    Extractor2 -->|Local SentenceTransformers| CandEmbeds
+    Resolver -->|2. Database Caching| DB[(PostgreSQL Cache)]
     
-    LocalSimilarity -->|Excludes Cites from Risk| Auditor[Audit & Risk Analyzer]
-    Auditor -->|Generate JSON/HTML Report| UI[Interactive Dashboard]
-    UI --> User
+    API -->|3. Schedule Job| DB
+    Worker[Background Worker Daemon] -->|4. Pull Queued Job| DB
+    Worker -->|5. Crawl Citations| Wiki[Wikimedia API]
+    Worker -->|6. Save Deduplicated Evidence| DB
+    
+    User -->|7. View Analytics| D3[D3.js Donut & Timeline Charts]
 ```
+
+### 1. Identity Resolution Chain
+Queries PubMed, Europe PMC, Crossref, and OpenAlex sequentially to normalize publication records (Title, Journal, Authors, Pub Date) and reconcile all identifier values (`pmid`, `doi`, `pmcid`, `openalex_id`) with full conflict detection (yielding HTTP 409 if resolved identifiers map to different pre-existing database records).
+
+### 2. Lock-Safe Background Worker
+The background worker daemon polls the database for scheduled crawlers, locking jobs to crawler Wikimedia/Wikipedia references.
+-   **Page-Level Deduplication**: Mentions within the same Wikipedia page are merged into a single reference.
+-   **Confidence Filtering**: Only high-confidence citations (`exact_identifier` or `canonical_url`) are set to `active=True`. Low-confidence matches (`probable`) are flagged `active=False` for audit.
 
 ---
 
 ## 💻 Technology Stack
 
-### Backend (Python 3.10+)
-- **FastAPI**: Lightweight, high-performance web API framework.
-- **Uvicorn**: ASGI server implementation for hosting the FastAPI endpoints.
-- **python-multipart**: Required by FastAPI to parse multipart file uploads from the dashboard UI.
-- **spaCy (`en_core_web_sm`)**: For local sentence tokenization and Named Entity Recognition (NER) keyword extraction.
-- **Sentence-Transformers (`all-MiniLM-L6-v2`)**: Local Siamese network embeddings model for calculating high-accuracy semantic similarity (running locally on CPU/GPU).
-- **pypdf & python-docx**: For in-memory text extraction from PDFs and Word documents.
-- **pytest**: For unit and integration tests.
+### Backend (Python 3.11)
+-   **FastAPI & Uvicorn**: High-performance HTTP server.
+-   **SQLAlchemy ORM & Alembic**: Database mapping and schema migration controls.
+-   **psycopg (v3)**: Modern PostgreSQL adapter.
+-   **Sentence-Transformers (`all-MiniLM-L6-v2`)**: Local semantic similarity model.
+-   **spaCy (`en_core_web_sm`)**: Local entity extraction.
 
 ### Frontend
-- **HTML5, CSS3 (Vanilla)**: Glassmorphic dark-theme, responsive cards, sidebar components, and custom color mappings.
-- **JavaScript (Vanilla)**: Asynchronous form submission, progress steps status trackers, SVG risk gauge ring updates, and dynamic tab switching.
+-   **D3.js (v7)**: Interactive data-driven documents (Donut charts & monthly bar timelines).
+-   **Glassmorphic CSS**: Premium dark-theme layouts with smooth visual transitions.
 
 ---
 
-## 🔗 Integrated Academic Databases
+## 🚀 Installation & Database Setup
 
-1. **NCBI PubMed E-Utilities**:
-   - `esearch`: Discovers matching PubMed IDs (PMIDs) based on anonymized keywords.
-   - `efetch`: Downloads XML abstracts and metadata for the discovered PMIDs.
-2. **Europe PMC (European Bioinformatics Institute)**:
-   - `search`: Queries open-access and preprint indexes for biology and medicine using `resultType=core` to fetch detailed abstracts, PMIDs, PMCIDs, and DOIs in a single request.
-3. **Smart Deduplication Engine**:
-   - Merges results from both databases and filters out duplicates based on PMID, DOI, or normalized Title.
-
----
-
-## 🚦 Smart Citation Identification
-
-Plagiarism checkers often flag correctly cited references as copied material. This system implements an intelligent **Citation Filter**:
-- It runs local heuristic parsing to detect if the candidate paper's DOI, title keywords, or first author's last name (e.g. *Linz*, *Schwark*) are mentioned in the text (e.g. `"...Linz et al. [45]..."`).
-- **Cited matches** are displayed in **green** with an `"Already Cited"` badge.
-- **Uncited matches** (potential issues) are grouped separately in red/yellow.
-- Cited matches are **excluded from risk score calculations**, ensuring legitimate citations do not skew your document's similarity rating.
-
----
-
-## 🚀 Installation & Setup
-
-### 1. Initialize Virtual Environment
-Create a virtual environment to prevent global package pollutions:
+### 1. Activate Virtual Environment & Install Packages
 ```bash
 python -m venv .venv
-```
-
-### 2. Activate the Environment
-- **Windows PowerShell**:
-  ```powershell
-  .venv\Scripts\Activate.ps1
-  ```
-- **Linux/macOS**:
-  ```bash
-  source .venv/bin/activate
-  ```
-
-### 3. Install Dependencies
-Install all package requirements:
-```bash
+.venv\Scripts\activate
 pip install -r requirements.txt
-```
-
-### 4. Download NLP Model
-Download the English language processing model for spaCy:
-```bash
 python -m spacy download en_core_web_sm
 ```
 
+### 2. Configure PostgreSQL Database
+Start a local PostgreSQL container (e.g. listening on port `5432`):
+```bash
+docker run -d --name research-attention-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=research_attention -p 5432:5432 postgres:15
+```
+
+### 3. Run Alembic Database Migrations
+Create the tables in your database using Alembic:
+```bash
+.venv\Scripts\alembic upgrade head
+```
+
 ---
 
-## 🛠️ Usage Guidelines
+## 🛠️ Operational Commands
 
-### 1. Launching the Web Dashboard & API
-Start the local server using Uvicorn:
+### 1. Start the FastAPI Web Server
 ```bash
 python -m uvicorn src.api:app --host 127.0.0.1 --port 8000 --reload
 ```
-Open **[http://127.0.0.1:8000](http://127.0.0.1:8000)** in your browser. 
-- **Sticky Reset Button**: To scan another document, click **"Analyze Another Document"** in the top-right header menu without scrolling.
+Open **`http://127.0.0.1:8000`** to access the Portal Hub.
 
-### 2. Running via the Command Line Interface (CLI)
-You can run a local terminal scan on any document:
+### 2. Start the Background Worker Daemon
+Start the worker loop to process queued attention crawler jobs in the background:
 ```bash
-python -m src.cli path/to/document.pdf
-```
-To export the report directly as a JSON file:
-```bash
-python -m src.cli path/to/document.pdf --output report.json
+python -m src.attention.worker
 ```
 
-### 3. Running Automated Tests
-Run unit tests to verify database parsers, encoders, and guardrails:
+### 3. Run the Automated Test Suite
+To run all database, resolver, connector, worker, and API-isolation tests:
 ```bash
 python -m pytest tests/
 ```
 
 ---
 
-## 🌐 API Usage Documentation
+## 🌐 Research Attention API Documentation
 
-FastAPI automatically generates interactive Swagger API documentation when the server is running. You can explore and execute live requests directly in your browser at:
-- **Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- **ReDoc**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+### 1. Lookup Publication Details
+Retrieves cached details, identifiers, and sync states. If the publication is uncached, resolves it and triggers a background ingest job.
+-   **PMID Lookup**: `GET /api/v1/research-attention/works/pmid/{pmid}`
+-   **DOI Lookup**: `GET /api/v1/research-attention/works/doi/{doi:path}` (handles paths containing slashes)
+-   **Work ID Lookup**: `GET /api/v1/research-attention/works/{work_id}`
 
-### Endpoint: Analyze Document
-Uploads a local document (PDF, Word, or TXT) in-memory, scrubs confidentiality keywords, queries PubMed and Europe PMC databases, and runs local similarity scans.
+### 2. Retrieve Visual Analytics Data
+Returns grouped counts for D3 charts and monthly buckets.
+-   **Path**: `GET /api/v1/research-attention/works/{work_id}/analytics`
 
-- **Method**: `POST`
-- **Path**: `/api/analyze`
-- **Headers**: `Content-Type: multipart/form-data`
-- **Request Body (form-data)**:
-  - `file`: (binary) The PDF, DOCX, or TXT file to analyze.
-
-#### Example Request (cURL)
-```bash
-curl -X POST "http://127.0.0.1:8000/api/analyze" \
-  -H "accept: application/json" \
-  -H "Content-Type: multipart/form-data" \
-  -F "file=@/path/to/my_research_paper.pdf"
-```
-
-#### Example Request (Python)
-```python
-import requests
-
-url = "http://127.0.0.1:8000/api/analyze"
-file_path = "my_research_paper.pdf"
-
-with open(file_path, "rb") as f:
-    files = {"file": (file_path, f, "application/pdf")}
-    response = requests.post(url, files=files)
-    
-if response.status_code == 200:
-    report = response.json()
-    print("Risk Level:", report["plagiarism_risk"]["level"])
-else:
-    print("Error:", response.json())
-```
-
-#### Example Response (JSON)
-```json
-{
-  "status": "success",
-  "metadata": {
-    "filename": "my_research_paper.pdf",
-    "word_count": 1067,
-    "sentences_analyzed": 48,
-    "execution_time_seconds": 2.14
-  },
-  "guardrails": {
-    "confidentiality_status": "SECURE",
-    "anonymized_search_keywords": ["ranibizumab", "retinopathy", "implant"],
-    "external_pmids_queried": ["35859876", "38140067"]
-  },
-  "plagiarism_risk": {
-    "level": "LOW",
-    "uncited_semantic_matches_count": 0,
-    "uncited_verbatim_matches_count": 0
-  },
-  "results": {
-    "verbatim_matches": [
-      {
-        "pmid": "35859876",
-        "title": "Discovery of Tenapanor: A First-in-Class Minimally...",
-        "doi": "10.1021/acs.jmedchem.2c00324",
-        "is_cited": true,
-        "jaccard_score": 0.83,
-        "matching_phrases": [
-          "To our knowledge, Tenapanor is the only NHE3 inhibitor..."
-        ]
-      }
-    ],
-    "semantic_matches": [
-      {
-        "pmid": "38140067",
-        "title": "Physiologically Based Biopharmaceutics Model...",
-        "doi": "10.1007/s11095-023-03612-4",
-        "is_cited": false,
-        "similarity_score": 0.78,
-        "source_sentence": "Tenapanor moves between 20 and 50 mEq of sodium into stool...",
-        "candidate_sentence": "The presented model successfully predicted both urine and stool sodium..."
-      }
-    ]
-  }
-}
-```
-
----
-
-## 🔒 Verification & Privacy Audit
-
-The codebase includes an automated audit script to trace outbound traffic and ensure zero data leaks. To run the confidentiality audit:
-```bash
-python scratch/check_guardrails.py
-```
-This script runs the analysis on a sample confidential paragraph, intercepts outbound requests, and asserts that:
-- No sentences appear in any query parameters.
-- Only isolated keywords are transmitted.
-- Output: `[OK] CONFIDENTIALITY VALIDATED: 100% LEAK-PROOF`.
+### 3. Force Ingestion Sync
+Queues a manual crawls crawler. Requires API key verification.
+-   **Path**: `POST /api/v1/research-attention/works/{work_id}/refresh`
+-   **Header**: `X-Research-Attention-Key: default-dev-key-change-me`

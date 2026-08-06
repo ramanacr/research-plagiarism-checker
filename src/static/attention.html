@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Attention & Analytics Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- D3.js Library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(22, 28, 45, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-color: #3b82f6;
+            --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Background Gradients */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            bottom: -10%;
+            right: -10%;
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        /* Header Navigation */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo-section h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #3b82f6, #60a5fa, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.25rem;
+        }
+
+        .logo-section p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.6rem 1.2rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(-4px);
+        }
+
+        /* Search Section */
+        .search-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .search-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.8rem 1.2rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .search-btn {
+            padding: 0.8rem 2rem;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .search-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Loader & Status Messaging */
+        .status-message {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Grid Layout */
+        .dashboard-grid {
+            display: none; /* hidden until loaded */
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: flex-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Metadata Details */
+        .metadata-list {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0.8rem 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .metadata-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+        }
+
+        .metadata-value {
+            color: var(--text-primary);
+        }
+
+        /* Chart Canvas */
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 280px;
+            position: relative;
+        }
+
+        .chart-tooltip {
+            position: absolute;
+            background: rgba(11, 15, 25, 0.95);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        /* Lists and Tables */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+        }
+
+        .refresh-row-btn {
+            padding: 0.4rem 0.8rem;
+            background-color: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--accent-color);
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .refresh-row-btn:hover {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            padding: 0.25rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 12px;
+            text-transform: uppercase;
+        }
+
+        .badge-ready { background-color: rgba(16, 185, 129, 0.15); color: var(--success-color); }
+        .badge-queued { background-color: rgba(245, 158, 11, 0.15); color: var(--warning-color); }
+        .badge-running { background-color: rgba(59, 130, 246, 0.15); color: var(--accent-color); }
+        .badge-failed { background-color: rgba(239, 68, 68, 0.15); color: var(--error-color); }
+
+        .timeline-bar {
+            fill: #3b82f6;
+            transition: fill 0.2s;
+        }
+
+        .timeline-bar:hover {
+            fill: #60a5fa;
+        }
+
+        .axis-label {
+            font-size: 0.75rem;
+            fill: var(--text-secondary);
+        }
+
+        .no-data-msg {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-section">
+            <h1>Research Attention Engine</h1>
+            <p>Track academic citations and digital footprint analytics</p>
+        </div>
+        <a href="/" class="back-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.5rem; vertical-align: middle;">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back to Portal
+        </a>
+    </header>
+
+    <!-- Search Section -->
+    <div class="search-container">
+        <h2 class="search-title">Lookup Publication Attention Metrics</h2>
+        <div class="search-box">
+            <input type="text" id="query-input" class="search-input" placeholder="Enter PMID (e.g. 33992) or DOI (e.g. 10.1000/xyz)..." value="33992">
+            <button id="search-btn" class="search-btn">Analyze Work</button>
+        </div>
+    </div>
+
+    <!-- Progress / Loading Status Card -->
+    <div id="loader-card" class="status-message">
+        <div class="spinner"></div>
+        <h3 id="loader-title" style="margin-bottom: 0.5rem;">Resolving identity metadata...</h3>
+        <p id="loader-subtitle" style="font-size: 0.9rem; color: var(--text-secondary);">Querying academic provider registries</p>
+    </div>
+
+    <!-- Dashboard Content Area (initially hidden) -->
+    <div id="dashboard-grid" class="dashboard-grid">
+        
+        <!-- Left Column: Details & Coverage -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+            <!-- Work Metadata Details Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Canonical Publication Info</h3>
+                </div>
+                <div class="metadata-list">
+                    <span class="metadata-label">Title</span>
+                    <span class="metadata-value" id="work-title">-</span>
+                    
+                    <span class="metadata-label">Journal</span>
+                    <span class="metadata-value" id="work-journal">-</span>
+                    
+                    <span class="metadata-label">Authors</span>
+                    <span class="metadata-value" id="work-authors">-</span>
+                    
+                    <span class="metadata-label">Published</span>
+                    <span class="metadata-value" id="work-date">-</span>
+                    
+                    <span class="metadata-label">DOI</span>
+                    <span class="metadata-value" id="work-doi">-</span>
+                    
+                    <span class="metadata-label">PMID</span>
+                    <span class="metadata-value" id="work-pmid">-</span>
+
+                    <span class="metadata-label">PMCID</span>
+                    <span class="metadata-value" id="work-pmcid">-</span>
+                </div>
+            </div>
+
+            <!-- Connector Status & Sync Status Card -->
+            <div class="card">
+                <div class="card-header" style="justify-content: space-between; display: flex;">
+                    <h3 class="card-title">Connector Coverage</h3>
+                    <button id="force-refresh-btn" class="refresh-row-btn">Force Job Sync</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Source</th>
+                                <th>Sync Status</th>
+                                <th>Reason / Errors</th>
+                            </tr>
+                        </thead>
+                        <tbody id="connector-table-body">
+                            <!-- Rows injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Visual Charts -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+            <!-- Pie Chart Breakdown Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Citation Share by Source</h3>
+                </div>
+                <div class="chart-container">
+                    <svg id="pie-chart" width="300" height="250"></svg>
+                    <div id="chart-tooltip-div" class="chart-tooltip"></div>
+                </div>
+            </div>
+
+            <!-- Timeline Chart Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Mentions Timeline</h3>
+                </div>
+                <div class="chart-container">
+                    <svg id="timeline-chart" width="400" height="250"></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full Width: Evidence Table -->
+        <div class="card" style="grid-column: 1 / -1;">
+            <div class="card-header">
+                <h3 class="card-title">Digital Evidence Log</h3>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Discovery Date</th>
+                            <th>Source</th>
+                            <th>Reference Page Title</th>
+                            <th>Matched ID</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="evidence-table-body">
+                        <!-- Evidence rows injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE = "/api/v1/research-attention";
+        const API_KEY = "default-dev-key-change-me"; // configured key
+
+        let pollingInterval = null;
+        let activeWorkId = null;
+
+        document.getElementById("search-btn").addEventListener("click", performSearch);
+        document.getElementById("force-refresh-btn").addEventListener("click", triggerRefresh);
+
+        function showLoader(title, subtitle) {
+            document.getElementById("loader-card").style.display = "flex";
+            document.getElementById("loader-title").innerText = title;
+            document.getElementById("loader-subtitle").innerText = subtitle;
+            document.getElementById("dashboard-grid").style.display = "none";
+        }
+
+        function hideLoader() {
+            document.getElementById("loader-card").style.display = "none";
+            document.getElementById("dashboard-grid").style.display = "grid";
+        }
+
+        async function performSearch() {
+            const val = document.getElementById("query-input").value.trim();
+            if (!val) return;
+
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+
+            let endpoint = "";
+            if (val.startsWith("10.") || val.includes("/")) {
+                // DOI path contains slashes, URL encode completely
+                endpoint = `${API_BASE}/works/doi/${encodeURIComponent(val)}`;
+            } else {
+                endpoint = `${API_BASE}/works/pmid/${val}`;
+            }
+
+            showLoader("Resolving canonical metadata...", "Querying identifier authority records");
+
+            try {
+                const res = await fetch(endpoint);
+                if (res.status === 404) {
+                    showLoader("Failed to resolve", "Could not locate this PMID/DOI in academic provider registries.");
+                    document.querySelector("#loader-card .spinner").style.display = "none";
+                    return;
+                } else if (!res.ok) {
+                    const err = await res.json();
+                    showLoader("Error resolving work", err.detail || "Connection failure");
+                    document.querySelector("#loader-card .spinner").style.display = "none";
+                    return;
+                }
+
+                const data = await res.json();
+                activeWorkId = data.work_id;
+                renderWorkDetails(data);
+
+                if (data.status === "queued" || data.coverage.refresh_state === "running" || data.coverage.refresh_state === "queued") {
+                    // Start polling
+                    startPolling(data.work_id);
+                } else {
+                    // Ready immediately
+                    hideLoader();
+                    fetchAndRenderAnalytics(data.work_id);
+                }
+
+            } catch (err) {
+                showLoader("Network Error", err.message);
+                document.querySelector("#loader-card .spinner").style.display = "none";
+            }
+        }
+
+        function startPolling(workId) {
+            showLoader("Evidence Ingestion in Progress...", "Wikimedia connector is crawling citation links");
+            
+            pollingInterval = setInterval(async () => {
+                try {
+                    const res = await fetch(`${API_BASE}/works/${workId}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        renderWorkDetails(data);
+                        if (data.coverage.refresh_state === "ready" || data.coverage.refresh_state === "failed") {
+                            clearInterval(pollingInterval);
+                            pollingInterval = null;
+                            hideLoader();
+                            fetchAndRenderAnalytics(workId);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Polling error", e);
+                }
+            }, 2000);
+        }
+
+        async function triggerRefresh() {
+            if (!activeWorkId) return;
+            showLoader("Queueing new sync job...", "Scheduling background attention crawler");
+            
+            try {
+                const res = await fetch(`${API_BASE}/works/${activeWorkId}/refresh`, {
+                    method: "POST",
+                    headers: {
+                        "X-Research-Attention-Key": API_KEY
+                    }
+                });
+                if (res.ok) {
+                    startPolling(activeWorkId);
+                } else {
+                    const err = await res.json();
+                    alert(`Failed to trigger refresh: ${err.detail || "Forbidden"}`);
+                    hideLoader();
+                }
+            } catch (e) {
+                alert("Network error: " + e.message);
+                hideLoader();
+            }
+        }
+
+        function renderWorkDetails(data) {
+            document.getElementById("work-title").innerText = data.canonical_work.title || "No Title Provided";
+            document.getElementById("work-journal").innerText = data.canonical_work.journal || "Unknown Journal";
+            document.getElementById("work-authors").innerText = (data.canonical_work.authors && data.canonical_work.authors.length) ? data.canonical_work.authors.join(", ") : "Not Provided";
+            document.getElementById("work-date").innerText = data.canonical_work.publication_date || "Unknown";
+            document.getElementById("work-doi").innerText = data.identifiers.doi || "None";
+            document.getElementById("work-pmid").innerText = data.identifiers.pmid || "None";
+            document.getElementById("work-pmcid").innerText = data.identifiers.pmcid || "None";
+
+            // Render connector coverage table
+            const tbody = document.getElementById("connector-table-body");
+            tbody.innerHTML = "";
+            data.coverage.sources.forEach(src => {
+                const tr = document.createElement("tr");
+                const stateClass = `badge badge-${src.state}`;
+                tr.innerHTML = `
+                    <td><strong>${src.source}</strong></td>
+                    <td><span class="${stateClass}">${src.state}</span></td>
+                    <td style="color: var(--text-secondary); font-size: 0.85rem;">${src.reason || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function fetchAndRenderAnalytics(workId) {
+            try {
+                const res = await fetch(`${API_BASE}/works/${workId}/analytics`);
+                if (res.ok) {
+                    const data = await res.json();
+                    renderEvidenceTable(data.evidence);
+                    renderCharts(data);
+                }
+            } catch (e) {
+                console.error("Failed to load analytics details", e);
+            }
+        }
+
+        function renderEvidenceTable(evidence) {
+            const tbody = document.getElementById("evidence-table-body");
+            tbody.innerHTML = "";
+            if (!evidence || !evidence.length) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No mentions or citation records found.</td></tr>`;
+                return;
+            }
+
+            evidence.forEach(ev => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${new Date(ev.discovered_at).toLocaleDateString()}</td>
+                    <td><span class="badge badge-ready">${ev.source}</span></td>
+                    <td><a href="${ev.url}" target="_blank" style="color: var(--accent-color); text-decoration: none;">${ev.title || ev.url}</a></td>
+                    <td><code>${ev.matched_identifier}</code></td>
+                    <td><span style="font-size: 0.85rem; font-weight: 500;">${ev.match_confidence}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Render D3 Visual Charts
+        function renderCharts(data) {
+            // Clear existing elements inside SVGs
+            d3.select("#pie-chart").selectAll("*").remove();
+            d3.select("#timeline-chart").selectAll("*").remove();
+
+            const sources = data.source_breakdown;
+            if (!sources || !sources.length) {
+                d3.select("#pie-chart").append("text")
+                    .attr("x", 150)
+                    .attr("y", 125)
+                    .attr("text-anchor", "middle")
+                    .attr("class", "no-data-msg")
+                    .text("No active citation shares");
+                d3.select("#timeline-chart").append("text")
+                    .attr("x", 200)
+                    .attr("y", 125)
+                    .attr("text-anchor", "middle")
+                    .attr("class", "no-data-msg")
+                    .text("No active timeline records");
+                return;
+            }
+
+            // --- 1. D3 PIE/DONUT CHART ---
+            const svgPie = d3.select("#pie-chart");
+            const width = +svgPie.attr("width");
+            const height = +svgPie.attr("height");
+            const radius = Math.min(width, height) / 2 - 20;
+
+            const gPie = svgPie.append("g")
+                .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+            const color = d3.scaleOrdinal()
+                .domain(sources.map(d => d.source))
+                .range(["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"]);
+
+            const pie = d3.pie()
+                .value(d => d.count)
+                .sort(null);
+
+            const arc = d3.arc()
+                .innerRadius(radius * 0.5) // donut style
+                .outerRadius(radius);
+
+            const tooltip = d3.select("#chart-tooltip-div");
+
+            const path = gPie.selectAll("path")
+                .data(pie(sources))
+                .enter().append("path")
+                .attr("d", arc)
+                .attr("fill", d => color(d.data.source))
+                .attr("stroke", "#0b0f19")
+                .attr("stroke-width", "2px")
+                .style("cursor", "pointer")
+                .on("mouseover", function(event, d) {
+                    d3.select(this).transition().duration(100).attr("transform", "scale(1.05)");
+                    tooltip.style("opacity", 1)
+                           .html(`<strong>${d.data.source}</strong>: ${d.data.count} citation(s)`);
+                })
+                .on("mousemove", function(event) {
+                    tooltip.style("left", (event.offsetX + 15) + "px")
+                           .style("top", (event.offsetY - 20) + "px");
+                })
+                .on("mouseout", function() {
+                    d3.select(this).transition().duration(100).attr("transform", "scale(1)");
+                    tooltip.style("opacity", 0);
+                });
+
+            // Center text total citations
+            const total = d3.sum(sources, d => d.count);
+            gPie.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dy", "0.3em")
+                .style("fill", "#fff")
+                .style("font-size", "1.1rem")
+                .style("font-weight", "700")
+                .text(total);
+
+            // --- 2. D3 TIMELINE BAR CHART ---
+            const svgTimeline = d3.select("#timeline-chart");
+            const tWidth = +svgTimeline.attr("width");
+            const tHeight = +svgTimeline.attr("height");
+            const margin = {top: 20, right: 20, bottom: 40, left: 40};
+            const innerWidth = tWidth - margin.left - margin.right;
+            const innerHeight = tHeight - margin.top - margin.bottom;
+
+            const gTimeline = svgTimeline.append("g")
+                .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+            const timelineData = data.timeline;
+            
+            // Map timeline counts to a flat sum for simplicity of bar chart y-axis
+            timelineData.forEach(d => {
+                d.totalVal = Object.values(d.counts).reduce((a, b) => a + b, 0);
+            });
+
+            const xScale = d3.scaleBand()
+                .domain(timelineData.map(d => d.timestamp))
+                .range([0, innerWidth])
+                .padding(0.3);
+
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(timelineData, d => d.totalVal) || 1])
+                .nice()
+                .range([innerHeight, 0]);
+
+            // X Axis
+            gTimeline.append("g")
+                .attr("transform", `translate(0, ${innerHeight})`)
+                .call(d3.axisBottom(xScale))
+                .selectAll("text")
+                .attr("class", "axis-label")
+                .style("text-anchor", "end")
+                .attr("dx", "-.8em")
+                .attr("dy", ".15em")
+                .attr("transform", "rotate(-35)");
+
+            // Y Axis
+            gTimeline.append("g")
+                .call(d3.axisLeft(yScale).ticks(5))
+                .selectAll("text")
+                .attr("class", "axis-label");
+
+            // Bars
+            gTimeline.selectAll(".timeline-bar")
+                .data(timelineData)
+                .enter().append("rect")
+                .attr("class", "timeline-bar")
+                .attr("x", d => xScale(d.timestamp))
+                .attr("y", d => yScale(d.totalVal))
+                .attr("width", xScale.bandwidth())
+                .attr("height", d => innerHeight - yScale(d.totalVal))
+                .attr("rx", 3)
+                .on("mouseover", function(event, d) {
+                    tooltip.style("opacity", 1)
+                           .html(`<strong>${d.timestamp}</strong>: ${d.totalVal} citation(s)`);
+                })
+                .on("mousemove", function(event) {
+                    tooltip.style("left", (event.offsetX + 15) + "px")
+                           .style("top", (event.offsetY - 20) + "px");
+                })
+                .on("mouseout", function() {
+                    tooltip.style("opacity", 0);
+                });
+        }
+
+        // Run default lookup on start
+        window.addEventListener("load", performSearch);
+    </script>
+</body>
+</html>

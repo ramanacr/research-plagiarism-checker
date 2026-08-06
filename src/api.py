@@ -2,7 +2,9 @@ import os
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from src.agent import ResearchGuardrailAgent
+from src.attention.router import router as attention_router
 
 app = FastAPI(
     title="Confidential Research Similarity & Plagiarism Checker",
@@ -18,6 +20,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register our research attention router
+app.include_router(attention_router)
+
+# Mount static files directory for local resources (like D3.js and styles)
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if not os.path.exists(static_dir):
+    os.makedirs(static_dir, exist_ok=True)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Initialize our agent locally
 # Note: On startup, this will load spaCy and SentenceTransformers
@@ -52,11 +63,28 @@ async def analyze_file(file: UploadFile = File(...)):
         )
 
 @app.get("/", response_class=HTMLResponse)
-def get_dashboard():
-    """Serves the front-end dashboard UI."""
+def get_portal_hub():
+    """Serves the portal landing Pre-page."""
+    portal_path = os.path.join(os.path.dirname(__file__), "static", "pre_page.html")
+    if not os.path.exists(portal_path):
+        raise HTTPException(status_code=404, detail="Portal pre-page UI file not found.")
+    with open(portal_path, "r", encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/plagiarism", response_class=HTMLResponse)
+def get_plagiarism_checker():
+    """Serves the plagiarism checker dashboard."""
     dashboard_path = os.path.join(os.path.dirname(__file__), "dashboard.html")
     if not os.path.exists(dashboard_path):
         raise HTTPException(status_code=404, detail="Dashboard UI file not found.")
-        
     with open(dashboard_path, "r", encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/attention", response_class=HTMLResponse)
+def get_attention_dashboard():
+    """Serves the research attention analytics dashboard."""
+    attention_path = os.path.join(os.path.dirname(__file__), "static", "attention.html")
+    if not os.path.exists(attention_path):
+        raise HTTPException(status_code=404, detail="Attention dashboard UI file not found.")
+    with open(attention_path, "r", encoding="utf-8") as f:
         return f.read()
