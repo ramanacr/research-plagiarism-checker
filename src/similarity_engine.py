@@ -1,5 +1,6 @@
 import re
 import numpy as np
+import spacy
 from typing import List, Dict, Any, Tuple
 from sentence_transformers import SentenceTransformer
 from src.config import EMBEDDING_MODEL_NAME, SEMANTIC_SIMILARITY_THRESHOLD, PLAGIARISM_JACCARD_THRESHOLD
@@ -9,6 +10,10 @@ class SimilarityEngine:
         # Initialize the SentenceTransformer model locally
         # This will download the model to a local cache directory on first run and run entirely locally thereafter.
         self.model = SentenceTransformer(EMBEDDING_MODEL_NAME)
+        
+        # Load a blank spacy model with only a sentencizer for light, memory-efficient candidate splitting
+        self.sent_nlp = spacy.blank("en")
+        self.sent_nlp.add_pipe("sentencizer")
 
     def compute_cosine_similarity(self, vec1: np.ndarray, vec2: np.ndarray) -> float:
         """Computes cosine similarity between two vectors."""
@@ -18,6 +23,45 @@ class SimilarityEngine:
         if norm1 == 0 or norm2 == 0:
             return 0.0
         return float(dot_product / (norm1 * norm2))
+
+    def filter_candidates_via_lsh(
+        self, 
+        doc_text: str, 
+        candidates: List[Dict[str, Any]], 
+        n_gram_size: int = 5, 
+        threshold: float = 0.1
+    ) -> List[Dict[str, Any]]:
+        """
+        Uses MinHash LSH indexing to prune candidates in sub-millisecond time.
+        Only candidates sharing overlapping shingle patterns are sent for detailed audit.
+        """
+        from datasketch import MinHash, MinHashLSH
+        
+        doc_shingles = self._get_ngrams(doc_text, n_gram_size)
+        if not doc_shingles:
+            return []
+            
+        doc_m = MinHash(num_perm=128)
+        for shingle in doc_shingles:
+            doc_m.update(" ".join(shingle).encode('utf-8'))
+            
+        lsh = MinHashLSH(threshold=threshold, num_perm=128)
+        
+        cand_by_idx = {}
+        for idx, cand in enumerate(candidates):
+            abstract = cand.get("abstract", "")
+            if not abstract:
+                continue
+            cand_shingles = self._get_ngrams(abstract, n_gram_size)
+            m = MinHash(num_perm=128)
+            for shingle in cand_shingles:
+                m.update(" ".join(shingle).encode('utf-8'))
+            
+            lsh.insert(str(idx), m)
+            cand_by_idx[str(idx)] = cand
+            
+        matching_idxs = lsh.query(doc_m)
+        return [cand_by_idx[idx] for idx in matching_idxs]
 
     def check_semantic_similarity(
         self, 
@@ -31,6 +75,11 @@ class SimilarityEngine:
         if not doc_sentences or not candidates:
             return []
 
+        # For larger candidate libraries, prune first using MinHash LSH to prevent performance degradation
+        if len(candidates) > 20:
+            doc_text = " ".join(doc_sentences)
+            candidates = self.filter_candidates_via_lsh(doc_text, candidates, threshold=0.1)
+
         # Embed all document sentences
         doc_embeddings = self.model.encode(doc_sentences, convert_to_numpy=True)
         
@@ -41,8 +90,9 @@ class SimilarityEngine:
             if not abstract:
                 continue
                 
-            # Split candidate abstract into sentences
-            cand_sentences = [s.strip() for s in re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', abstract) if len(s.strip()) > 10]
+            # Split candidate abstract into sentences using spacy sentencizer (highly accurate boundary detection)
+            doc_cand = self.sent_nlp(abstract)
+            cand_sentences = [sent.text.strip() for sent in doc_cand.sents if len(sent.text.strip()) > 10]
             if not cand_sentences:
                 continue
                 
@@ -85,6 +135,10 @@ class SimilarityEngine:
         """
         if not doc_text or not candidates:
             return []
+
+        # For larger candidate libraries, prune first using MinHash LSH
+        if len(candidates) > 20:
+            candidates = self.filter_candidates_via_lsh(doc_text, candidates, threshold=0.1)
 
         doc_shingles = self._get_ngrams(doc_text, n_gram_size)
         if not doc_shingles:

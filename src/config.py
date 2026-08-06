@@ -6,7 +6,7 @@ UPLOAD_TEMP_DIR = None  # None indicates in-memory processing only
 
 # Local AI Models
 # Using a lightweight, high-performance local embedding model
-EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
+EMBEDDING_MODEL_NAME = "all-mpnet-base-v2"
 SPACY_MODEL_NAME = "en_core_web_trf"
 
 # Similarity thresholds

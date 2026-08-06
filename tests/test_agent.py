@@ -159,5 +159,25 @@ class TestConfidentialPlagiarismChecker(unittest.TestCase):
         self.assertEqual(res[0]["title"], "Mock Title")
         self.assertEqual(res[0]["authors"], ["A. Author", "B. Author"])
 
+    def test_lsh_candidate_filtering(self):
+        doc = "This is a highly confidential document about cancer immunotherapy and genomics."
+        candidates = [
+            {
+                "pmid": "1",
+                "title": "Genomics study 1",
+                "abstract": "This is a highly confidential document about cancer immunotherapy and genomics."
+            },
+            {
+                "pmid": "2",
+                "title": "Unrelated study",
+                "abstract": "Water purification using gravity filtering systems in remote locations."
+            }
+        ]
+        
+        filtered = self.similarity_engine.filter_candidates_via_lsh(doc, candidates, threshold=0.1)
+        pmids = [c["pmid"] for c in filtered]
+        self.assertIn("1", pmids)
+        self.assertNotIn("2", pmids)
+
 if __name__ == '__main__':
     unittest.main()
