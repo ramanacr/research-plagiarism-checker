@@ -39,9 +39,22 @@ class DocumentExtractor:
             return []
 
         if self.nlp:
-            # spaCy sentence tokenizer handles abbreviations and medical terms better
-            doc = self.nlp(cleaned_text[:1000000])  # limit to 1M characters to avoid spaCy OOM
-            return [sent.text.strip() for sent in doc.sents if len(sent.text.strip()) > 10]
+            # Process in boundary-aligned chunks of 50,000 characters to prevent transformer OOM/slowdown
+            chunk_size = 50000
+            sentences = []
+            start = 0
+            while start < len(cleaned_text):
+                end = start + chunk_size
+                if end < len(cleaned_text):
+                    # Search for clean sentence boundary to avoid splitting mid-sentence
+                    split_idx = cleaned_text.rfind('. ', start + 40000, end)
+                    if split_idx != -1:
+                        end = split_idx + 1  # include the period
+                chunk = cleaned_text[start:end]
+                doc = self.nlp(chunk)
+                sentences.extend([sent.text.strip() for sent in doc.sents if len(sent.text.strip()) > 10])
+                start = end
+            return sentences
         else:
             # Fallback simple regex sentence splitter if spaCy model is not ready
             sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', cleaned_text)
@@ -62,8 +75,8 @@ class DocumentExtractor:
         if not self.nlp:
             return self.fallback_keyword_extraction(text, max_keywords)
 
-        # Process the first 100,000 characters for keyword extraction (more than enough for theme)
-        doc = self.nlp(text[:100000].lower())
+        # Process the first 50,000 characters for keyword extraction (fully sufficient for key themes)
+        doc = self.nlp(text[:50000].lower())
         
         candidates = []
         

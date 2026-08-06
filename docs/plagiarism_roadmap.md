@@ -8,15 +8,14 @@ This document outlines structural upgrades to enhance semantic accuracy and scal
 
 To scale our plagiarism detection engine and eliminate errors in similarity scoring, we outline three key structural upgrades:
 
-### Upgrade 1: Switch to `spacy-transformers` (Contextual NER and Preprocessing)
-- **Concept**: Switch the spaCy pipeline model loading from static word vectors (`en_core_web_lg`) to a transformer-based model like `en_core_web_trf`.
+### Upgrade 1: Switch to `spacy-transformers` (Contextual NER and Preprocessing) [COMPLETED]
+- **Concept**: Switch the spaCy pipeline model loading from static word vectors (`en_core_web_sm`/`en_core_web_lg`) to a transformer-based model like `en_core_web_trf`.
 - **Implementation**:
-  - Install `spacy-transformers` dependency.
-  - Load the transformer pipeline:
-    ```python
-    nlp = spacy.load("en_core_web_trf")
-    ```
-- **Why**: The `.similarity()` method will evaluate context dynamically using a BERT-based transformer model. This provides far more precise part-of-speech tag annotations, syntactic boundaries, and noun-chunk segments during Named Entity Recognition (NER) preprocessing.
+  - Installed `spacy-transformers` dependency.
+  - Configured `SPACY_MODEL_NAME = "en_core_web_trf"` inside `src/config.py`.
+  - Implemented boundary-aligned document chunking in `get_sentences` (processing text in 50,000-character segments split cleanly at sentence endings) to prevent CPU/GPU memory saturation and OOMs.
+  - Capped keyword extraction text slices at 50,000 characters.
+- **Why**: The `.similarity()` method now evaluates context dynamically using a BERT-based transformer model. This provides far more precise part-of-speech tag annotations, syntactic boundaries, and noun-chunk segments during Named Entity Recognition (NER) preprocessing.
 
 ### Upgrade 2: Integrate `sentence-transformers` (The Semantic Industry Standard)
 - **Concept**: Continue our decoupling of text processing from vector space mapping:

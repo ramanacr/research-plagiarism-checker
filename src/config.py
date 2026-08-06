@@ -7,7 +7,7 @@ UPLOAD_TEMP_DIR = None  # None indicates in-memory processing only
 # Local AI Models
 # Using a lightweight, high-performance local embedding model
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
-SPACY_MODEL_NAME = "en_core_web_sm"
+SPACY_MODEL_NAME = "en_core_web_trf"
 
 # Similarity thresholds
 SEMANTIC_SIMILARITY_THRESHOLD = 0.75  # Trigger flag if sentence similarity exceeds this
