@@ -1,7 +1,7 @@
 import urllib.parse
 import requests
 import datetime
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Set
 import src.config
 from src.attention.connectors.base import AttentionConnector, ConnectorResult
 from src.attention.models import ResearchWork
@@ -101,10 +101,119 @@ class WikimediaConnector(AttentionConnector):
                 # We log or ignore individual query term network issues and proceed to next term
                 pass
 
-        evidence_list = list(evidence_by_pageid.values())
+        pageids = list(evidence_by_pageid.keys())
+        verified_pageids = self._verify_pages(pageids, work)
+        
+        final_evidence = [
+            evidence_by_pageid[pid]
+            for pid in pageids
+            if pid in verified_pageids
+        ]
+        
         return ConnectorResult(
             source="wikipedia",
             state="ready",
-            evidence=evidence_list,
-            item_count=len(evidence_list)
+            evidence=final_evidence,
+            item_count=len(final_evidence)
         )
+
+    def _verify_pages(self, pageids: List[int], work: ResearchWork) -> Set[int]:
+        from typing import Set
+        if not pageids:
+            return set()
+
+        verified_ids = set()
+        
+        # Build verification criteria
+        dois = []
+        pmids = []
+        pmcids = []
+        for ident in work.identifiers:
+            val = ident.normalized_value
+            if ident.scheme == "doi":
+                dois.append(val.lower())
+            elif ident.scheme == "pmid":
+                pmids.append(val)
+            elif ident.scheme == "pmcid":
+                pmcids.append(val.lower())
+                pmcids.append(val.replace("PMC", "").lower())
+
+        # Chunk queries by 50 (MediaWiki API limit for pageids)
+        chunk_size = 50
+        for i in range(0, len(pageids), chunk_size):
+            chunk = pageids[i:i+chunk_size]
+            try:
+                response = requests.get(
+                    self.api_url,
+                    params={
+                        "action": "query",
+                        "pageids": "|".join(str(pid) for pid in chunk),
+                        "prop": "revisions",
+                        "rvprop": "content",
+                        "rvslots": "main",
+                        "format": "json"
+                    },
+                    headers={"User-Agent": "ConfidentialPlagiarismChecker/1.0 (mailto:agent@google.com)"},
+                    timeout=10
+                )
+                if response.status_code != 200:
+                    verified_ids.update(chunk)
+                    continue
+                
+                data = response.json()
+                pages = data.get("query", {}).get("pages", {})
+                
+                for pid_str, page_info in pages.items():
+                    pid = int(pid_str)
+                    revisions = page_info.get("revisions", [])
+                    if not revisions:
+                        continue
+                    
+                    content = ""
+                    rev = revisions[0]
+                    if "slots" in rev and "main" in rev["slots"] and "*" in rev["slots"]["main"]:
+                        content = rev["slots"]["main"]["*"]
+                    elif "*" in rev:
+                        content = rev["*"]
+                    
+                    if not content:
+                        continue
+                        
+                    content_lower = content.lower()
+                    is_valid = False
+                    
+                    # 1. Validate DOIs
+                    for doi in dois:
+                        if doi in content_lower:
+                            is_valid = True
+                            break
+                    if is_valid:
+                        verified_ids.add(pid)
+                        continue
+                        
+                    # 2. Validate PMIDs (must have number AND citation context keywords)
+                    for pmid in pmids:
+                        if pmid in content_lower:
+                            keywords = ["pmid", "pubmed", "ncbi", "cite journal", "citation", "doi", "journal"]
+                            if any(kw in content_lower for kw in keywords):
+                                is_valid = True
+                                break
+                    if is_valid:
+                        verified_ids.add(pid)
+                        continue
+
+                    # 3. Validate PMCIDs
+                    for pmcid in pmcids:
+                        if pmcid in content_lower:
+                            if pmcid.startswith("pmc") or any(kw in content_lower for kw in ["pmc", "pmcid", "pubmed", "ncbi"]):
+                                is_valid = True
+                                break
+                    if is_valid:
+                        verified_ids.add(pid)
+                        continue
+
+            except Exception:
+                # Keep matching pages on transient API error to avoid false negatives
+                verified_ids.update(chunk)
+                
+        return verified_ids

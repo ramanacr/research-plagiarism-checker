@@ -36,10 +36,10 @@ class TestWikimediaConnector(unittest.TestCase):
 
     @patch("requests.get")
     def test_collect_success_and_deduplicate(self, mock_get):
-        # Mock API response returning same pageid 51234 for both search queries
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {
+        # 1. Mock search queries response
+        mock_search_response = MagicMock()
+        mock_search_response.status_code = 200
+        mock_search_response.json.return_value = {
             "query": {
                 "search": [
                     {
@@ -50,7 +50,30 @@ class TestWikimediaConnector(unittest.TestCase):
                 ]
             }
         }
-        mock_get.return_value = mock_response
+        
+        # 2. Mock revision query response (verifies DOI exist in page wikitext)
+        mock_revisions_response = MagicMock()
+        mock_revisions_response.status_code = 200
+        mock_revisions_response.json.return_value = {
+            "query": {
+                "pages": {
+                    "51234": {
+                        "pageid": 51234,
+                        "revisions": [
+                            {
+                                "slots": {
+                                    "main": {
+                                        "*": "This page mentions DOI 10.1000/test in references."
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+        
+        mock_get.side_effect = [mock_search_response, mock_search_response, mock_revisions_response]
         
         res = self.connector.collect(self.work)
         
