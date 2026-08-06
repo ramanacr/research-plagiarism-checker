@@ -29,12 +29,13 @@ class WikimediaConnector(AttentionConnector):
             if ident.scheme == "doi":
                 search_terms.append((f"doi:{val}", f'"{val}"'))
             elif ident.scheme == "pmid":
-                search_terms.append((f"pmid:{val}", f'"{val}"'))
+                search_terms.append((f"pmid:{val}", f'"pmid {val}"'))
             elif ident.scheme == "pmcid":
                 search_terms.append((f"pmcid:{val}", f'"{val}"'))
-                # Also try without PMC prefix if stored raw
+                # If PMC prefix is present, also search for contextual keywords with raw number
                 raw_pmc = val.replace("PMC", "")
-                search_terms.append((f"pmcid:{val}", f'"{raw_pmc}"'))
+                search_terms.append((f"pmcid:{val}", f'"pmcid {raw_pmc}"'))
+                search_terms.append((f"pmcid:{val}", f'"pmc {raw_pmc}"'))
 
         if not search_terms:
             return ConnectorResult(source="wikipedia", state="ready", evidence=[], item_count=0)
