@@ -27,15 +27,31 @@ class CrossrefEventConnector(AttentionConnector):
         if not doi:
             return ConnectorResult(source="crossref_event", state="ready", evidence=[], item_count=0)
 
+        import time
         try:
             target_url = f"https://doi.org/{doi}"
-            response = requests.get(
-                self.api_url,
-                params={"obj-id": target_url, "rows": 100},
-                headers={"User-Agent": "ConfidentialPlagiarismChecker/1.0 (mailto:agent@google.com)"},
-                timeout=10
-            )
-            if response.status_code != 200:
+            
+            # Retry loop for transient connection timeouts
+            retries = 3
+            response = None
+            for attempt in range(retries):
+                try:
+                    response = requests.get(
+                        self.api_url,
+                        params={"obj-id": target_url, "rows": 100},
+                        headers={"User-Agent": "ConfidentialPlagiarismChecker/1.0 (mailto:agent@google.com)"},
+                        timeout=10
+                    )
+                    if response.status_code == 200:
+                        break
+                    elif response.status_code == 429: # Rate limited
+                        time.sleep(2)
+                except (requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout):
+                    if attempt == retries - 1:
+                        raise
+                    time.sleep(1)
+            
+            if not response or response.status_code != 200:
                 return ConnectorResult(source="crossref_event", state="ready", evidence=[], item_count=0)
 
             data = response.json()
