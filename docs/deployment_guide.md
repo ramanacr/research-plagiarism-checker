@@ -1,6 +1,6 @@
 # 🚀 Deployment and Publishing Guide
 
-This guide details the step-by-step procedure to deploy the **Secure Academic Research Suite & Attention Analytics Engine** in two environments:
+This guide details the step-by-step procedure to deploy the **Secure Life Sciences Research Suite & Attention Analytics Engine** in two environments:
 1. **AWS Cloud** (Enterprise, scalable, cloud-managed infrastructure).
 2. **Internal/On-Premises Server** (Air-gapped friendly, highly secure, VM/bare-metal containerized infrastructure).
 
@@ -340,7 +340,7 @@ Create two unit service configurations to handle system restarts, logs, and proc
 ##### Service 1: Web API (`/etc/systemd/system/research-web.service`)
 ```ini
 [Unit]
-Description=Secure Academic Research API Service
+Description=Secure Life Sciences Research API Service
 After=network.target postgresql.service
 
 [Service]

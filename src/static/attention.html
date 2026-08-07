@@ -446,7 +446,7 @@
     <header>
         <div class="logo-section">
             <h1>Research Attention Engine</h1>
-            <p>Track academic citations and digital footprint analytics</p>
+            <p>Track life sciences citations and digital footprint analytics</p>
         </div>
         <div style="display: flex; gap: 16px; align-items: center;">
             <!-- Theme Toggle Control -->
@@ -485,7 +485,7 @@
     <div id="loader-card" class="status-message">
         <div class="spinner"></div>
         <h3 id="loader-title" style="margin-bottom: 0.5rem;">Resolving identity metadata...</h3>
-        <p id="loader-subtitle" style="font-size: 0.9rem; color: var(--text-secondary);">Querying academic provider registries</p>
+        <p id="loader-subtitle" style="font-size: 0.9rem; color: var(--text-secondary);">Querying life sciences provider registries</p>
     </div>
 
     <!-- Dashboard Content Area (initially hidden) -->
@@ -638,7 +638,7 @@
             try {
                 const res = await fetch(endpoint);
                 if (res.status === 404) {
-                    showLoader("Failed to resolve", "Could not locate this PMID/DOI in academic provider registries.");
+                    showLoader("Failed to resolve", "Could not locate this PMID/DOI in life sciences provider registries.");
                     document.querySelector("#loader-card .spinner").style.display = "none";
                     return;
                 } else if (!res.ok) {

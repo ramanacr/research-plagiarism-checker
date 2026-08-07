@@ -1,6 +1,6 @@
-# Secure Academic Research Suite & Attention Analytics Engine
+# Secure Life Sciences Research Suite & Attention Analytics Engine
 
-A secure, **local-first** academic plagiarism engine combined with an automated **Digital Footprint & Attention Analytics** crawler. This portal provides research integrity checks and tracks citation analytics against global academic registries (PubMed, Europe PMC, Crossref, OpenAlex, Wikimedia, PubPeer) in a unified interface.
+A secure, **local-first** life sciences plagiarism engine combined with an automated **Digital Footprint & Attention Analytics** crawler. This portal provides research integrity checks and tracks citation analytics against global registries (PubMed, Europe PMC, Crossref, OpenAlex, Wikimedia, PubPeer) in a unified interface.
 
 > **Competing at Altmetric-level accuracy** — every connector and similarity model is designed for zero-error precision.
 
@@ -126,7 +126,7 @@ graph TD
 |-----------|--------|------|
 | **Wikimedia / Wikipedia** | Mentions in article text | Digital evidence |
 | **Crossref Event Data** | Science blog & forum mentions | Digital evidence |
-| **OpenAlex** | Academic citation graph | Citations |
+| **OpenAlex** | Life sciences citation graph | Citations |
 | **PubPeer** | Post-publication peer commentary & retraction flags | Peer review |
 
 #### Wikimedia Accuracy Hardening

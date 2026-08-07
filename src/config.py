@@ -16,7 +16,7 @@ PLAGIARISM_JACCARD_THRESHOLD = 0.60   # Trigger flag if Jaccard similarity of n-
 # PubMed API limits and endpoints
 PUBMED_ESEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 PUBMED_EFETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
-MAX_PUBMED_RESULTS = 10  # Number of academic references to fetch and check
+MAX_PUBMED_RESULTS = 10  # Number of life sciences references to fetch and check
 
 # Server settings
 API_HOST = "127.0.0.1"

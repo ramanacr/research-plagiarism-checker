@@ -102,7 +102,7 @@ def main():
                 print(f"    Matching: \"{item['matching_sentence']}\"")
         
         if not results["verbatim_plagiarism_flags"] and not results["semantic_similarity_flags"]:
-            print("\n[OK] Clean! No matching academic publications or plagiarism detected.")
+            print("\n[OK] Clean! No matching life sciences publications or plagiarism detected.")
             
         print("="*60 + "\n")
 

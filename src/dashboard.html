@@ -980,7 +980,7 @@
                     <div class="empty-state">
                         <div class="empty-state-icon">🛡️</div>
                         <h4>No Semantic Overlaps Found</h4>
-                        <p>No matching academic publication abstracts found that exhibit paraphrased similarity.</p>
+                        <p>No matching life sciences publication abstracts found that exhibit paraphrased similarity.</p>
                     </div>`;
             } else {
                 const uncitedMatches = data.results.semantic_similarity_flags.filter(m => !m.is_cited);
@@ -1044,7 +1044,7 @@
                     <div class="empty-state">
                         <div class="empty-state-icon">✓</div>
                         <h4>No Copy-Paste Plagiarism Flagged</h4>
-                        <p>No verbatim word sequences matching academic databases were detected.</p>
+                        <p>No verbatim word sequences matching life sciences databases were detected.</p>
                     </div>`;
             } else {
                 const uncitedVerb = data.results.verbatim_plagiarism_flags.filter(m => !m.is_cited);

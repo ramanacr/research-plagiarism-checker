@@ -8,7 +8,7 @@ from src.attention.router import router as attention_router
 
 app = FastAPI(
     title="Confidential Research Similarity & Plagiarism Checker",
-    description="Secure, local-first API to check plagiarism and semantic similarity against academic databases.",
+    description="Secure, local-first API to check plagiarism and semantic similarity against life sciences databases.",
     version="1.0.0"
 )
 

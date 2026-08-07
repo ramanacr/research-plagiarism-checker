@@ -73,7 +73,7 @@ class WorkResolver:
                 resolved_metadata = self.providers[3].resolve_doi(norm_doi)
 
         if not resolved_metadata:
-            raise HTTPException(status_code=404, detail="Publication could not be resolved from any academic provider.")
+            raise HTTPException(status_code=404, detail="Publication could not be resolved from any life sciences provider.")
 
         # Re-verify and resolve identifiers returned by the provider
         resolved_ids = {}
