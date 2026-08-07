@@ -5,7 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confidential Research Plagiarism & Similarity Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Theme loading script to prevent flash -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            if (savedTheme === 'system') {
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        })();
+    </script>
     <style>
+        /* Dark Theme Variables (Default) */
         :root {
             --bg-dark: #0a0e17;
             --bg-card: rgba(22, 28, 45, 0.6);
@@ -20,6 +33,53 @@
             --danger-glow: rgba(239, 68, 68, 0.15);
             --text-main: #f3f4f6;
             --text-muted: #9ca3af;
+            --card-shadow: rgba(0, 0, 0, 0.2);
+            --header-bg: rgba(10, 14, 23, 0.8);
+            --upload-dash: rgba(255, 255, 255, 0.15);
+            --upload-bg: rgba(255, 255, 255, 0.01);
+            --spinner-border: rgba(255, 255, 255, 0.1);
+            --input-bg: rgba(255, 255, 255, 0.03);
+            --list-item-bg: rgba(255, 255, 255, 0.02);
+            --pre-bg: #111827;
+            --tab-active-bg: rgba(99, 102, 241, 0.1);
+            --toggle-bg: rgba(255, 255, 255, 0.05);
+            --toggle-border: rgba(255, 255, 255, 0.1);
+            --toggle-active-bg: rgba(255, 255, 255, 0.15);
+            --toggle-text: #f3f4f6;
+            --toggle-text-inactive: #9ca3af;
+            --header-btn-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Light Theme Variables */
+        html[data-theme="light"] {
+            --bg-dark: #f8fafc;
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --border-color: rgba(15, 23, 42, 0.08);
+            --primary: #4f46e5;
+            --primary-glow: rgba(79, 70, 229, 0.15);
+            --success: #047857;
+            --success-glow: rgba(4, 120, 87, 0.15);
+            --warning: #b45309;
+            --warning-glow: rgba(180, 83, 9, 0.15);
+            --danger: #b91c1c;
+            --danger-glow: rgba(185, 28, 28, 0.15);
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --card-shadow: rgba(148, 163, 184, 0.15);
+            --header-bg: rgba(248, 250, 252, 0.8);
+            --upload-dash: rgba(15, 23, 42, 0.15);
+            --upload-bg: rgba(15, 23, 42, 0.01);
+            --spinner-border: rgba(15, 23, 42, 0.1);
+            --input-bg: rgba(15, 23, 42, 0.02);
+            --list-item-bg: rgba(15, 23, 42, 0.02);
+            --pre-bg: #f1f5f9;
+            --tab-active-bg: rgba(79, 70, 229, 0.06);
+            --toggle-bg: rgba(15, 23, 42, 0.05);
+            --toggle-border: rgba(15, 23, 42, 0.08);
+            --toggle-active-bg: #ffffff;
+            --toggle-text: #0f172a;
+            --toggle-text-inactive: #64748b;
+            --header-btn-bg: rgba(15, 23, 42, 0.05);
         }
 
         * {
@@ -44,7 +104,7 @@
         header {
             padding: 24px 40px;
             border-bottom: 1px solid var(--border-color);
-            background: rgba(10, 14, 23, 0.8);
+            background: var(--header-bg);
             backdrop-filter: blur(12px);
             position: sticky;
             top: 0;
@@ -52,6 +112,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background-color 0.3s ease;
         }
 
         .logo-container {
@@ -70,6 +131,7 @@
             justify-content: center;
             font-weight: bold;
             box-shadow: 0 0 20px var(--primary-glow);
+            color: #ffffff;
         }
 
         .logo-text h1 {
@@ -93,6 +155,7 @@
             font-weight: 600;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
         }
 
@@ -122,19 +185,19 @@
             border-radius: 16px;
             padding: 32px;
             backdrop-filter: blur(16px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 32px var(--card-shadow);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* Upload Container styles */
         .upload-area {
-            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border: 2px dashed var(--upload-dash);
             border-radius: 16px;
             padding: 48px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s ease-in-out;
-            background: rgba(255, 255, 255, 0.01);
+            background: var(--upload-bg);
             position: relative;
             overflow: hidden;
         }
@@ -202,7 +265,7 @@
         .spinner {
             width: 50px;
             height: 50px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
+            border: 3px solid var(--spinner-border);
             border-radius: 50%;
             border-top-color: var(--primary);
             animation: spin 1s linear infinite;
@@ -301,7 +364,7 @@
 
         .circle-bg {
             fill: none;
-            stroke: rgba(255, 255, 255, 0.05);
+            stroke: var(--border-color);
             stroke-width: 12;
         }
 
@@ -368,7 +431,7 @@
         }
 
         .info-item {
-            background: rgba(255, 255, 255, 0.02);
+            background: var(--list-item-bg);
             border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 16px;
@@ -406,7 +469,7 @@
 
         .keyword-pill {
             display: inline-block;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--toggle-bg);
             border: 1px solid var(--border-color);
             padding: 6px 12px;
             border-radius: 100px;
@@ -457,7 +520,7 @@
         }
 
         .match-card {
-            background: rgba(255, 255, 255, 0.02);
+            background: var(--list-item-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 24px;
@@ -507,6 +570,48 @@
             display: flex;
             align-items: center;
             gap: 4px;
+        }
+
+        /* Theme Toggle Styling */
+        .theme-toggle-container {
+            display: inline-flex;
+            background: var(--toggle-bg);
+            border: 1px solid var(--toggle-border);
+            border-radius: 20px;
+            padding: 2px;
+            gap: 2px;
+            align-items: center;
+        }
+
+        .theme-toggle-btn {
+            background: none;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--toggle-text-inactive);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0;
+        }
+
+        .theme-toggle-btn:hover {
+            color: var(--toggle-text);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .theme-toggle-btn.active {
+            background: var(--toggle-active-bg);
+            color: var(--toggle-text);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .theme-toggle-btn svg {
+            display: block;
+            pointer-events: none;
         }
 
         .side-by-side {
@@ -578,11 +683,25 @@
             </div>
         </div>
         <div style="display: flex; gap: 16px; align-items: center;">
-            <a href="/" class="btn" style="padding: 6px 16px; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-main); box-shadow: none;">
+            <a href="/" class="btn" style="padding: 6px 16px; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: var(--header-btn-bg); border: 1px solid var(--border-color); color: var(--text-main); box-shadow: none;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 Portal Hub
             </a>
-            <button id="header-reset-btn" class="btn" style="display: none; padding: 6px 16px; font-size: 13px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-main); box-shadow: none;" onclick="resetAnalyzer()">Analyze Another Document</button>
+            <button id="header-reset-btn" class="btn" style="display: none; padding: 6px 16px; font-size: 13px; background: var(--header-btn-bg); border: 1px solid var(--border-color); color: var(--text-main); box-shadow: none;" onclick="resetAnalyzer()">Analyze Another Document</button>
+            
+            <!-- Theme Toggle Control -->
+            <div class="theme-toggle-container">
+                <button class="theme-toggle-btn" data-theme-value="light" title="Light Theme">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                </button>
+                <button class="theme-toggle-btn" data-theme-value="dark" title="Dark Theme">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+                <button class="theme-toggle-btn" data-theme-value="system" title="System Preference">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                </button>
+            </div>
+
             <div class="badge">
                 <span class="badge-dot"></span>
                 Strict Guardrails Active
@@ -873,7 +992,7 @@
                     let html = `<h4 style="margin: 24px 0 12px 0; color: ${isCitedSection ? 'var(--success)' : (riskColor === 'var(--danger)' ? 'var(--danger)' : 'var(--warning)')}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${title} (${matchesList.length})</h4>`;
                     
                     matchesList.forEach(match => {
-                        const cardBg = isCitedSection ? 'rgba(16, 185, 129, 0.03)' : 'rgba(255, 255, 255, 0.02)';
+                        const cardBg = isCitedSection ? 'rgba(16, 185, 129, 0.03)' : 'var(--list-item-bg)';
                         const cardBorder = isCitedSection ? 'rgba(16, 185, 129, 0.2)' : 'var(--border-color)';
                         const badgeBg = isCitedSection ? 'rgba(16, 185, 129, 0.1)' : riskGlow;
                         const badgeColor = isCitedSection ? 'var(--success)' : riskColor;
@@ -937,7 +1056,7 @@
                     let html = `<h4 style="margin: 24px 0 12px 0; color: ${isCitedSection ? 'var(--success)' : 'var(--danger)'}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${title} (${matchesList.length})</h4>`;
                     
                     matchesList.forEach(match => {
-                        const cardBg = isCitedSection ? 'rgba(16, 185, 129, 0.03)' : 'rgba(255, 255, 255, 0.02)';
+                        const cardBg = isCitedSection ? 'rgba(16, 185, 129, 0.03)' : 'var(--list-item-bg)';
                         const cardBorder = isCitedSection ? 'rgba(16, 185, 129, 0.2)' : 'var(--border-color)';
                         const highlightStyle = isCitedSection ? 'style="background-color: rgba(16, 185, 129, 0.2); border-bottom: 1.5px solid var(--success); color: #fff; font-family:monospace; font-size:13px;"' : 'class="highlight-text" style="font-family:monospace; font-size:13px;"';
 
@@ -1009,6 +1128,48 @@
                 el.classList.remove('active', 'completed');
             });
         }
+
+        // Theme management logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeButtons = document.querySelectorAll('.theme-toggle-btn');
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            
+            // Set active button UI state
+            themeButtons.forEach(btn => {
+                if (btn.getAttribute('data-theme-value') === savedTheme) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Listen for theme buttons click
+            themeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const theme = btn.getAttribute('data-theme-value');
+                    localStorage.setItem('theme', theme);
+                    
+                    themeButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    applyTheme(theme);
+                });
+            });
+
+            function applyTheme(theme) {
+                if (theme === 'system') {
+                    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+                } else {
+                    document.documentElement.setAttribute('data-theme', theme);
+                }
+            }
+
+            // Sync with changes in system preference when system is selected
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                if (localStorage.getItem('theme') === 'system') {
+                    document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+                }
+            });
+        });
     </script>
 </body>
 </html>
