@@ -6,7 +6,39 @@ This guide details the step-by-step procedure to deploy the **Secure Academic Re
 
 ---
 
-## 📋 Common Prerequisites & Environmental Config
+## 📋 Common Prerequisites
+
+Before initiating deployment, verify that your host systems and environments meet the following requirements:
+
+### 1. Compute & Hardware Requirements
+* **RAM**: Minimum **8 GB RAM** (Recommended: **16 GB RAM**). Running spaCy’s transformer model (`en_core_web_trf`) alongside the sentence embedding model (`all-mpnet-base-v2`) requires a substantial memory footprint.
+* **Storage**: At least **10 GB of free disk space** to store the container base layers and model weights (SBERT model is ~420MB; spaCy transformer is ~400MB; plus base dependencies).
+* **CPU/GPU**: Multi-core modern CPU is required. GPU (NVIDIA CUDA compatible) is optional but recommended for high-throughput batch document similarity processing.
+
+### 2. Software & Tooling Dependencies
+
+#### For AWS Cloud Deployment:
+* **AWS Account** with permissions to manage IAM roles, ECS Cluster, ECR registries, Route 53 records, and RDS instances.
+* **AWS CLI (v2)** installed and configured with appropriate admin/deployment profile keys.
+* **Docker Engine** (or Docker Desktop) installed locally to build and tag the initial container.
+
+#### For Internal / On-Premises Deployment:
+* **Operating System**: Modern Linux (Ubuntu 22.04 LTS, Debian 12, RHEL 8+, or equivalent) is highly recommended.
+* **Docker Environment** (if containerizing):
+  - **Docker Engine** (v20.10.0 or higher)
+  - **Docker Compose** (v2.0.0 or higher)
+* **Bare-Metal Environment** (if deploying natively):
+  - **Python**: Version **3.11.x** installed.
+  - **PostgreSQL Database**: Version **15 or 16** installed and running.
+  - **Nginx**: Installed to act as the reverse proxy.
+
+### 3. Port & Network Permissions
+Ensure the following ports are allocated or open on your firewall/security groups:
+* **Port `80` & `443`**: External access to Route 53 ALB (AWS) or local Nginx proxy (internal server).
+* **Port `8000`**: Backend FastAPI web application. (Should remain private / protected behind reverse proxy).
+* **Port `5432`**: PostgreSQL Database connections. (Must be locked down to only accept local-loopback or VPC container group traffic).
+
+### 4. Environmental Configuration Variables
 
 Regardless of the target environment, the application requires configuration variables. Create a template of environment variables to be set in your cloud container task definitions or local system environment:
 
