@@ -28,3 +28,5 @@ scratch/run_server.py
 # OS-specific
 .DS_Store
 Thumbs.db
+.codegraph/
+

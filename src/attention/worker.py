@@ -6,7 +6,28 @@ from src.attention.database import SessionLocal
 from src.attention.models import AttentionJob, ResearchWork, SourceRefresh
 from src.attention.connectors.registry import ConnectorRegistry
 from src.attention.services import save_evidence
-from src.config import RESEARCH_ATTENTION_WEEKLY_REFRESH_INTERVAL
+from src.config import (
+
+    RESEARCH_ATTENTION_REALTIME_REFRESH_INTERVAL,
+    RESEARCH_ATTENTION_DAILY_REFRESH_INTERVAL,
+    RESEARCH_ATTENTION_QUARTERLY_REFRESH_INTERVAL,
+    RESEARCH_ATTENTION_LEGACY_REFRESH_INTERVAL,
+    RESEARCH_ATTENTION_WEEKLY_REFRESH_INTERVAL
+)
+
+def get_source_refresh_interval(source: str) -> int:
+    """Returns the update frequency interval in seconds based on Table 1."""
+    realtime_sources = {"twitter", "news", "scopus", "wikipedia", "web_of_science", "crossref_event"}
+    legacy_sources = {"sina_weibo", "citeulike", "pinterest", "linkedin"}
+    
+    if source in realtime_sources:
+        return RESEARCH_ATTENTION_REALTIME_REFRESH_INTERVAL
+    elif source == "open_syllabus":
+        return RESEARCH_ATTENTION_QUARTERLY_REFRESH_INTERVAL
+    elif source in legacy_sources:
+        return RESEARCH_ATTENTION_LEGACY_REFRESH_INTERVAL
+    else:
+        return RESEARCH_ATTENTION_DAILY_REFRESH_INTERVAL
 
 def process_one_job() -> bool:
     """
@@ -58,7 +79,8 @@ def process_one_job() -> bool:
                     refresh.state = "ready"
                     refresh.completed_at = datetime.datetime.utcnow()
                     refresh.item_count = len(res.evidence)
-                    refresh.next_refresh_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=RESEARCH_ATTENTION_WEEKLY_REFRESH_INTERVAL)
+                    interval_sec = get_source_refresh_interval(source)
+                    refresh.next_refresh_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=interval_sec)
                     refresh.error_code = None
                     refresh.error_message = None
                     
@@ -76,6 +98,7 @@ def process_one_job() -> bool:
                 refresh.completed_at = datetime.datetime.utcnow()
             
             db.commit()
+
 
         # Mark job complete
         job.state = "completed"

@@ -55,6 +55,28 @@ class CoverageDetails(BaseModel):
     next_refresh_after: Optional[str] = None
     sources: List[SourceCoverageItem] = Field(default_factory=list)
 
+class DonutSlice(BaseModel):
+    source: str
+    color: str
+    unique_authors: int
+    subscore: float
+    percentage: float
+
+class AltmetricDonutDetails(BaseModel):
+    total_score: int
+    slices: List[DonutSlice] = Field(default_factory=list)
+
+class AltmetricScoreMetrics(BaseModel):
+    mendeley_readers: int = 0
+    citation_counts: int = 0
+    total_unique_contributors: int = 0
+
+class AltmetricScoreDetails(BaseModel):
+    score: float
+    integer_score: int
+    donut: AltmetricDonutDetails
+    metrics: AltmetricScoreMetrics
+
 class WorkDetailsResponse(BaseModel):
     work_id: str
     status: str
@@ -62,6 +84,7 @@ class WorkDetailsResponse(BaseModel):
     identifiers: WorkIdentifiers
     attention: AttentionDetails
     coverage: CoverageDetails
+    altmetric_score: Optional[AltmetricScoreDetails] = None
 
 # Analytics schema
 class SourceBreakdownItem(BaseModel):
@@ -79,3 +102,5 @@ class WorkAnalyticsResponse(BaseModel):
     evidence: List[AttentionEvidenceItem] = Field(default_factory=list)
     coverage: CoverageDetails
     updated_at: str
+    altmetric_score: Optional[AltmetricScoreDetails] = None
+

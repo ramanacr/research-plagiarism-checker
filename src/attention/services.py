@@ -162,6 +162,24 @@ def get_work_details(db: Session, work_id: str) -> Dict[str, Any]:
     elif "failed" in refresh_states:
         overall_state = "failed"
 
+    # Calculate Altmetric Attention Score and Donut breakdown
+    from src.attention.scoring import AltmetricScoreCalculator
+    evidence_dicts_for_scoring = []
+    for ev in active_evidences:
+        evidence_dicts_for_scoring.append({
+            "source": ev.source,
+            "source_type": ev.source_type,
+            "external_id": ev.external_id,
+            "url": ev.url,
+            "title": ev.title,
+            "published_at": ev.published_at,
+            "matched_identifier": ev.matched_identifier,
+            "match_confidence": ev.match_confidence,
+            "raw_reference_json": ev.raw_reference_json,
+            "active": ev.active
+        })
+    score_details = AltmetricScoreCalculator.calculate_score(evidence_dicts_for_scoring)
+
     return {
         "work_id": work.id,
         "status": "ready" if overall_state == "ready" else "queued",
@@ -180,5 +198,7 @@ def get_work_details(db: Session, work_id: str) -> Dict[str, Any]:
             "refresh_state": overall_state,
             "next_refresh_after": next_refresh_after,
             "sources": sources_coverage
-        }
+        },
+        "altmetric_score": score_details
     }
+

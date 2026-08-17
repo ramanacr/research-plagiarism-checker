@@ -79,9 +79,10 @@ class TestWorker(unittest.TestCase):
         self.assertEqual(refresh_db.state, "ready")
         self.assertEqual(refresh_db.item_count, 1)
         
-        evidence_db = self.session.query(AttentionEvidence).filter_by(work_id="wrk_test123").all()
+        evidence_db = self.session.query(AttentionEvidence).filter_by(work_id="wrk_test123", source="wikipedia").all()
         self.assertEqual(len(evidence_db), 1)
         self.assertEqual(evidence_db[0].url, "https://en.wikipedia.org/wiki/Page1")
+
 
     @patch("src.attention.connectors.wikimedia.WikimediaConnector.collect")
     def test_process_job_connector_failure(self, mock_collect):
