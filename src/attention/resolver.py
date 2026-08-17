@@ -75,6 +75,30 @@ class WorkResolver:
         if not resolved_metadata:
             raise HTTPException(status_code=404, detail="Publication could not be resolved from any life sciences provider.")
 
+        # Cross-enrich missing identifiers (e.g. if PubMed omitted DOI, query Europe PMC & OpenAlex)
+        if norm_pmid:
+            if not resolved_metadata.doi or not resolved_metadata.pmcid:
+                try:
+                    epmc_meta = self.providers[1].resolve_pmid(norm_pmid)
+                    if epmc_meta:
+                        if not resolved_metadata.doi and epmc_meta.doi:
+                            resolved_metadata.doi = epmc_meta.doi
+                        if not resolved_metadata.pmcid and epmc_meta.pmcid:
+                            resolved_metadata.pmcid = epmc_meta.pmcid
+                except Exception:
+                    pass
+
+            if not resolved_metadata.openalex_id or not resolved_metadata.doi:
+                try:
+                    oa_meta = self.providers[3].resolve_pmid(norm_pmid)
+                    if oa_meta:
+                        if not resolved_metadata.openalex_id and oa_meta.openalex_id:
+                            resolved_metadata.openalex_id = oa_meta.openalex_id
+                        if not resolved_metadata.doi and oa_meta.doi:
+                            resolved_metadata.doi = oa_meta.doi
+                except Exception:
+                    pass
+
         # Re-verify and resolve identifiers returned by the provider
         resolved_ids = {}
         if resolved_metadata.pmid:
@@ -85,6 +109,7 @@ class WorkResolver:
             resolved_ids["pmcid"] = resolved_metadata.pmcid.strip()
         if resolved_metadata.openalex_id:
             resolved_ids["openalex_id"] = resolved_metadata.openalex_id.strip()
+
 
         # Check for conflicts against resolved IDs
         matched_works = {}

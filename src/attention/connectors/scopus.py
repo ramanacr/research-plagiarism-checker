@@ -43,12 +43,23 @@ class ScopusConnector(AttentionConnector):
                     "X-ELS-APIKey": api_key,
                     "Accept": "application/json"
                 }
-                query = f'DOI("{doi}")' if doi else f'PMID("{pmid}")'
-                resp = requests.get(self.api_url, headers=headers, params={"query": query}, timeout=10)
-                if resp.status_code == 200:
-                    entries = resp.json().get("search-results", {}).get("entry", [])
+                
+                # Query by PMID first, then DOI
+                entries = []
+                if pmid:
+                    resp_pmid = requests.get(self.api_url, headers=headers, params={"query": f"PMID({pmid})"}, timeout=10)
+                    if resp_pmid.status_code == 200:
+                        entries = resp_pmid.json().get("search-results", {}).get("entry", [])
+                
+                if not entries and doi:
+                    resp_doi = requests.get(self.api_url, headers=headers, params={"query": f"DOI({doi})"}, timeout=10)
+                    if resp_doi.status_code == 200:
+                        entries = resp_doi.json().get("search-results", {}).get("entry", [])
+
+
+                if entries:
                     for entry in entries:
-                        scopus_id = entry.get("dc:identifier")
+                        scopus_id = entry.get("dc:identifier") or entry.get("eid")
                         title = entry.get("dc:title", "Scopus Document")
                         citedby_count = int(entry.get("citedby-count", 0))
                         pub_date = None
@@ -58,6 +69,7 @@ class ScopusConnector(AttentionConnector):
                                 pub_date = datetime.date.fromisoformat(cover_date)
                             except ValueError:
                                 pass
+
 
                         link = None
                         for l in entry.get("link", []):
