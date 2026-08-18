@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Research Attention & Analytics Dashboard</title>
+    <title>Research Attention & Analytics Engine</title>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- D3.js Library -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <!-- Theme loading script to prevent flash -->
@@ -24,10 +24,12 @@
         /* Dark Theme Variables (Default) */
         :root {
             --bg-color: #0b0f19;
-            --card-bg: rgba(22, 28, 45, 0.7);
+            --card-bg: rgba(22, 28, 45, 0.75);
+            --card-bg-elevated: rgba(30, 38, 60, 0.85);
             --border-color: rgba(255, 255, 255, 0.08);
             --text-primary: #f3f4f6;
             --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
             --accent-color: #3b82f6;
             --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
             --success-color: #10b981;
@@ -41,25 +43,31 @@
             --toggle-text: #f3f4f6;
             --toggle-text-inactive: #9ca3af;
             --spinner-border: rgba(255, 255, 255, 0.1);
-            --table-border: rgba(255, 255, 255, 0.03);
-            --card-shadow: rgba(0, 0, 0, 0.2);
+            --table-border: rgba(255, 255, 255, 0.04);
+            --card-shadow: rgba(0, 0, 0, 0.35);
             --input-bg: rgba(255, 255, 255, 0.05);
-            --axis-color: #ffffff;
+            --axis-color: #9ca3af;
             --chart-text: #9ca3af;
+            --tooltip-bg: #1e293b;
+            --tooltip-text: #f8fafc;
+            --tooltip-border: rgba(255, 255, 255, 0.15);
+            --stat-badge-bg: rgba(59, 130, 246, 0.12);
         }
 
         /* Light Theme Variables */
         html[data-theme="light"] {
             --bg-color: #f8fafc;
-            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-bg-elevated: #ffffff;
             --border-color: rgba(15, 23, 42, 0.08);
             --text-primary: #0f172a;
             --text-secondary: #475569;
-            --accent-color: #1d4ed8;
+            --text-muted: #94a3b8;
+            --accent-color: #2563eb;
             --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            --success-color: #047857;
-            --warning-color: #b45309;
-            --error-color: #b91c1c;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --error-color: #dc2626;
             --glow-color-1: rgba(59, 130, 246, 0.08);
             --glow-color-2: rgba(16, 185, 129, 0.05);
             --toggle-bg: rgba(15, 23, 42, 0.05);
@@ -68,11 +76,15 @@
             --toggle-text: #0f172a;
             --toggle-text-inactive: #64748b;
             --spinner-border: rgba(15, 23, 42, 0.1);
-            --table-border: rgba(15, 23, 42, 0.05);
-            --card-shadow: rgba(148, 163, 184, 0.15);
-            --input-bg: rgba(15, 23, 42, 0.02);
-            --axis-color: #0f172a;
+            --table-border: rgba(15, 23, 42, 0.06);
+            --card-shadow: rgba(148, 163, 184, 0.18);
+            --input-bg: rgba(15, 23, 42, 0.03);
+            --axis-color: #475569;
             --chart-text: #475569;
+            --tooltip-bg: #ffffff;
+            --tooltip-text: #0f172a;
+            --tooltip-border: rgba(15, 23, 42, 0.15);
+            --stat-badge-bg: rgba(37, 99, 235, 0.08);
         }
 
         * {
@@ -118,14 +130,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
             padding-bottom: 1.5rem;
             border-bottom: 1px solid var(--border-color);
         }
 
         .logo-section h1 {
             font-size: 1.75rem;
-            font-weight: 700;
+            font-weight: 800;
             background: linear-gradient(to right, #3b82f6, #60a5fa, #10b981);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -161,16 +173,16 @@
             background: var(--card-bg);
             backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2.5rem;
+            border-radius: 14px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
             box-shadow: 0 8px 32px 0 var(--card-shadow);
         }
 
         .search-title {
             font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
         }
 
         .search-box {
@@ -180,7 +192,7 @@
 
         .search-input {
             flex: 1;
-            padding: 0.8rem 1.2rem;
+            padding: 0.85rem 1.2rem;
             background-color: var(--input-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -196,7 +208,7 @@
         }
 
         .search-btn {
-            padding: 0.8rem 2rem;
+            padding: 0.85rem 2rem;
             background: var(--accent-gradient);
             border: none;
             border-radius: 8px;
@@ -240,14 +252,27 @@
 
         /* Grid Layout */
         .dashboard-grid {
-            display: none; /* hidden until loaded */
-            grid-template-columns: 1fr 1fr;
+            display: none;
+            display: flex;
+            flex-direction: column;
             gap: 2rem;
             margin-bottom: 2.5rem;
         }
 
+        .cards-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .two-col-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
         @media (max-width: 1024px) {
-            .dashboard-grid {
+            .two-col-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -256,31 +281,151 @@
             background: var(--card-bg);
             backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
+            border-radius: 14px;
+            padding: 1.75rem;
             box-shadow: 0 8px 32px 0 var(--card-shadow);
         }
 
         .card-header {
             display: flex;
-            justify-content: flex-between;
+            justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 0.75rem;
         }
 
         .card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
+            font-size: 1.15rem;
+            font-weight: 700;
             color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Altmetric Score Donut Hero */
+        .donut-hero-container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .donut-hero-container {
+                grid-template-columns: 1fr;
+                justify-items: center;
+            }
+        }
+
+        .donut-wrapper {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .donut-center-badge {
+            position: absolute;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .donut-score-number {
+            font-size: 2.75rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .donut-score-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .donut-breakdown-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem 1.5rem;
+        }
+
+        .donut-source-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0.75rem;
+            background: var(--input-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        .donut-source-color-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        /* Metric Stat Cards */
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stat-header {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .stat-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .stat-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--stat-badge-bg);
+            color: var(--accent-color);
         }
 
         /* Metadata Details */
         .metadata-list {
             display: grid;
             grid-template-columns: auto 1fr;
-            gap: 0.8rem 1.5rem;
+            gap: 0.75rem 1.5rem;
             font-size: 0.95rem;
         }
 
@@ -288,12 +433,13 @@
             font-weight: 600;
             color: var(--text-secondary);
             text-transform: uppercase;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             letter-spacing: 0.05em;
         }
 
         .metadata-value {
             color: var(--text-primary);
+            word-break: break-word;
         }
 
         /* Chart Canvas */
@@ -302,26 +448,36 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 280px;
+            min-height: 260px;
             position: relative;
         }
 
+        /* Fixed Light / Dark Tooltip with High Contrast */
         .chart-tooltip {
             position: absolute;
-            background: rgba(11, 15, 25, 0.95);
-            border: 1px solid var(--border-color);
-            padding: 0.5rem 0.8rem;
-            border-radius: 6px;
+            background: var(--tooltip-bg);
+            color: var(--tooltip-text);
+            border: 1px solid var(--tooltip-border);
+            padding: 0.6rem 0.9rem;
+            border-radius: 8px;
             font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: 0 8px 24px var(--card-shadow);
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.15s;
+            transition: opacity 0.15s ease;
+            z-index: 100;
+        }
+
+        .chart-tooltip strong {
+            color: var(--tooltip-text);
+            font-weight: 700;
         }
 
         /* Lists and Tables */
         .table-container {
             overflow-x: auto;
-            margin-top: 1rem;
+            margin-top: 0.75rem;
         }
 
         table {
@@ -341,7 +497,7 @@
         }
 
         td {
-            padding: 1rem;
+            padding: 0.9rem 1rem;
             border-bottom: 1px solid var(--table-border);
             color: var(--text-primary);
         }
@@ -351,7 +507,7 @@
             background-color: rgba(59, 130, 246, 0.1);
             border: 1px solid rgba(59, 130, 246, 0.3);
             color: var(--accent-color);
-            font-weight: 500;
+            font-weight: 600;
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.8rem;
@@ -361,6 +517,38 @@
         .refresh-row-btn:hover {
             background-color: var(--accent-color);
             color: #fff;
+        }
+
+        /* Filter Tabs for Evidence */
+        .tab-bar {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: var(--input-bg);
+        }
+
+        .tab-btn.active {
+            color: #fff;
+            background: var(--accent-color);
         }
 
         /* Badges */
@@ -389,13 +577,13 @@
 
         .axis-label {
             font-size: 0.75rem;
-            fill: var(--text-secondary);
+            fill: var(--axis-color) !important;
         }
 
         .no-data-msg {
             color: var(--text-secondary);
             font-size: 0.95rem;
-            margin-top: 2rem;
+            fill: var(--text-secondary);
         }
 
         /* Theme Toggle Styling */
@@ -446,7 +634,7 @@
     <header>
         <div class="logo-section">
             <h1>Research Attention Engine</h1>
-            <p>Track life sciences citations and digital footprint analytics</p>
+            <p>Independent scholarly citation & digital attention footprint analytics</p>
         </div>
         <div style="display: flex; gap: 16px; align-items: center;">
             <!-- Theme Toggle Control -->
@@ -491,8 +679,89 @@
     <!-- Dashboard Content Area (initially hidden) -->
     <div id="dashboard-grid" class="dashboard-grid">
         
-        <!-- Left Column: Details & Coverage -->
-        <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <!-- 1. Altmetric Attention Score & Donut Hero Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    Altmetric Attention Score & Benchmark
+                </h3>
+                <span class="stat-pill" id="percentile-badge">High Influence</span>
+            </div>
+            <div class="donut-hero-container">
+                <div class="donut-wrapper">
+                    <svg id="altmetric-donut-svg" width="220" height="220"></svg>
+                    <div class="donut-center-badge">
+                        <div class="donut-score-number" id="donut-score-display">0</div>
+                        <div class="donut-score-label">Attention Score</div>
+                    </div>
+                </div>
+                <div>
+                    <div style="margin-bottom: 1rem;">
+                        <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.35rem;" id="score-summary-heading">Attention Summary</h4>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary);" id="score-summary-desc">Tracks weighted attention across policy documents, news, academic citations, and online discussions.</p>
+                    </div>
+                    <div class="donut-breakdown-list" id="donut-legend-list">
+                        <!-- Legend items injected dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Rich Key Metrics Cards Row -->
+        <div class="cards-row">
+            <!-- Academic Citations Card -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span>Academic Citations</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+                <div class="stat-value" id="stat-citations-total">0</div>
+                <div class="stat-sub">
+                    <span style="color: var(--success-color);" id="stat-citations-indep">0 Independent</span>
+                    <span style="color: var(--warning-color);" id="stat-citations-self">0 Self-Cites</span>
+                </div>
+            </div>
+
+            <!-- Readership & Bookmarks Card -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span>Mendeley Readership</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <div class="stat-value" id="stat-mendeley-readers">0</div>
+                <div class="stat-sub">
+                    <span>Scholarly readers saved to reference libraries</span>
+                </div>
+            </div>
+
+            <!-- Public & Policy Influence Card -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span>Policy & News Influence</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                </div>
+                <div class="stat-value" id="stat-policy-news">0</div>
+                <div class="stat-sub">
+                    <span id="stat-policy-sub">0 Policy Docs</span> &bull; <span id="stat-news-sub">0 News</span> &bull; <span id="stat-wiki-sub">0 Wikipedia</span>
+                </div>
+            </div>
+
+            <!-- Unique Contributors Card -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span>Unique Contributors</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path></svg>
+                </div>
+                <div class="stat-value" id="stat-contributors">0</div>
+                <div class="stat-sub">
+                    <span>Individual people & outlets mentioning work</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Two Columns: Canonical Work Info & Connector Sync Status -->
+        <div class="two-col-grid">
             <!-- Work Metadata Details Card -->
             <div class="card">
                 <div class="card-header">
@@ -524,17 +793,17 @@
 
             <!-- Connector Status & Sync Status Card -->
             <div class="card">
-                <div class="card-header" style="justify-content: space-between; display: flex;">
-                    <h3 class="card-title">Connector Coverage</h3>
-                    <button id="force-refresh-btn" class="refresh-row-btn">Force Job Sync</button>
+                <div class="card-header">
+                    <h3 class="card-title">Connector Scope & Coverage (23 Channels)</h3>
+                    <button id="force-refresh-btn" class="refresh-row-btn">Force Sync</button>
                 </div>
-                <div class="table-container">
+                <div class="table-container" style="max-height: 280px; overflow-y: auto;">
                     <table>
                         <thead>
                             <tr>
                                 <th>Source</th>
                                 <th>Sync Status</th>
-                                <th>Reason / Errors</th>
+                                <th>Evidence Count</th>
                             </tr>
                         </thead>
                         <tbody id="connector-table-body">
@@ -545,42 +814,51 @@
             </div>
         </div>
 
-        <!-- Right Column: Visual Charts -->
-        <div style="display: flex; flex-direction: column; gap: 2rem;">
-            <!-- Pie Chart Breakdown Card -->
+        <!-- 4. Visual Analytics: Attention Share & Timeline -->
+        <div class="two-col-grid">
+            <!-- Source Breakdown Bar / Pie -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Citation Share by Source</h3>
+                    <h3 class="card-title">Attention Distribution by Channel</h3>
                 </div>
                 <div class="chart-container">
-                    <svg id="pie-chart" width="300" height="250"></svg>
+                    <svg id="pie-chart" width="340" height="240"></svg>
                     <div id="chart-tooltip-div" class="chart-tooltip"></div>
                 </div>
             </div>
 
-            <!-- Timeline Chart Card -->
+            <!-- Attention Timeline -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Mentions Timeline</h3>
+                    <h3 class="card-title">Cumulative Attention Timeline</h3>
                 </div>
                 <div class="chart-container">
-                    <svg id="timeline-chart" width="400" height="250"></svg>
+                    <svg id="timeline-chart" width="420" height="240"></svg>
                 </div>
             </div>
         </div>
 
-        <!-- Full Width: Evidence Table -->
-        <div class="card" style="grid-column: 1 / -1;">
+        <!-- 5. Tabbed Evidence Explorer -->
+        <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Digital Evidence Log</h3>
+                <h3 class="card-title">Digital Evidence & Inbound Citation Explorer</h3>
             </div>
+            
+            <div class="tab-bar" id="evidence-tabs">
+                <button class="tab-btn active" data-tab="all">All Evidence (<span id="tab-count-all">0</span>)</button>
+                <button class="tab-btn" data-tab="academic">Academic Citations (<span id="tab-count-academic">0</span>)</button>
+                <button class="tab-btn" data-tab="policy">Policy & News (<span id="tab-count-policy">0</span>)</button>
+                <button class="tab-btn" data-tab="social">Social & Discussion (<span id="tab-count-social">0</span>)</button>
+                <button class="tab-btn" data-tab="wiki">Wikipedia & Syllabi (<span id="tab-count-wiki">0</span>)</button>
+            </div>
+
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>Discovery Date</th>
+                            <th>Date</th>
                             <th>Source</th>
-                            <th>Reference Page Title</th>
+                            <th>Reference / Citing Title</th>
                             <th>Matched ID</th>
                             <th>Confidence</th>
                         </tr>
@@ -596,13 +874,52 @@
 
     <script>
         const API_BASE = "/api/v1/research-attention";
-        const API_KEY = "default-dev-key-change-me"; // configured key
+        const API_KEY = "default-dev-key-change-me";
 
         let pollingInterval = null;
         let activeWorkId = null;
+        let allEvidenceCache = [];
+        let activeFilterTab = "all";
+
+        // Altmetric Source Colors
+        const DONUT_COLORS = {
+            "policy_documents": "#762a83",
+            "policy": "#762a83",
+            "news": "#d73027",
+            "blogs": "#fee08b",
+            "twitter": "#4575b4",
+            "pubpeer": "#66c2a5",
+            "publons": "#66c2a5",
+            "facebook": "#1877f2",
+            "sina_weibo": "#f46d43",
+            "wikipedia": "#7f7f7f",
+            "google_plus": "#c51b7d",
+            "linkedin": "#0077b5",
+            "reddit": "#ff4500",
+            "f1000": "#fc8d59",
+            "stackoverflow": "#f48024",
+            "youtube": "#e41a1c",
+            "pinterest": "#bd0026",
+            "open_syllabus": "#31a354",
+            "mendeley": "#2b83ba",
+            "scopus": "#2b83ba",
+            "web_of_science": "#2b83ba",
+            "openalex": "#2b83ba",
+            "crossref_event": "#8073ac"
+        };
 
         document.getElementById("search-btn").addEventListener("click", performSearch);
         document.getElementById("force-refresh-btn").addEventListener("click", triggerRefresh);
+
+        // Tab click listeners
+        document.querySelectorAll(".tab-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                activeFilterTab = btn.getAttribute("data-tab");
+                renderFilteredEvidence();
+            });
+        });
 
         function showLoader(title, subtitle) {
             document.getElementById("loader-card").style.display = "flex";
@@ -613,7 +930,7 @@
 
         function hideLoader() {
             document.getElementById("loader-card").style.display = "none";
-            document.getElementById("dashboard-grid").style.display = "grid";
+            document.getElementById("dashboard-grid").style.display = "flex";
         }
 
         async function performSearch() {
@@ -627,7 +944,6 @@
 
             let endpoint = "";
             if (val.startsWith("10.") || val.includes("/")) {
-                // DOI path contains slashes, URL encode completely
                 endpoint = `${API_BASE}/works/doi/${encodeURIComponent(val)}`;
             } else {
                 endpoint = `${API_BASE}/works/pmid/${val}`;
@@ -653,10 +969,8 @@
                 renderWorkDetails(data);
 
                 if (data.status === "queued" || data.coverage.refresh_state === "running" || data.coverage.refresh_state === "queued") {
-                    // Start polling
                     startPolling(data.work_id);
                 } else {
-                    // Ready immediately
                     hideLoader();
                     fetchAndRenderAnalytics(data.work_id);
                 }
@@ -668,7 +982,7 @@
         }
 
         function startPolling(workId) {
-            showLoader("Evidence Ingestion in Progress...", "Wikimedia connector is crawling citation links");
+            showLoader("Evidence Ingestion in Progress...", "Collecting third-party citations, policy records, and social mentions");
             
             pollingInterval = setInterval(async () => {
                 try {
@@ -722,16 +1036,35 @@
             document.getElementById("work-pmid").innerText = data.identifiers.pmid || "None";
             document.getElementById("work-pmcid").innerText = data.identifiers.pmcid || "None";
 
+            // Render Altmetric metrics
+            const scoreObj = data.altmetric_score || {};
+            const intScore = scoreObj.integer_score || 0;
+            document.getElementById("donut-score-display").innerText = intScore;
+
+            const metrics = scoreObj.metrics || {};
+            document.getElementById("stat-citations-total").innerText = metrics.citation_counts || 0;
+            document.getElementById("stat-citations-indep").innerText = `${metrics.independent_citations || metrics.citation_counts || 0} Independent`;
+            document.getElementById("stat-citations-self").innerText = `${metrics.self_citations || 0} Self-Cites`;
+            document.getElementById("stat-mendeley-readers").innerText = metrics.mendeley_readers || 0;
+            document.getElementById("stat-contributors").innerText = metrics.total_unique_contributors || 0;
+
+            // Render Donut Wheel
+            renderAltmetricDonut(scoreObj.donut || { total_score: intScore, slices: [] });
+
             // Render connector coverage table
             const tbody = document.getElementById("connector-table-body");
             tbody.innerHTML = "";
             data.coverage.sources.forEach(src => {
                 const tr = document.createElement("tr");
                 const stateClass = `badge badge-${src.state}`;
+                const evCount = (data.attention && data.attention.summary) 
+                    ? (data.attention.summary.find(s => s.source === src.source)?.evidence_count || 0)
+                    : 0;
+
                 tr.innerHTML = `
-                    <td><strong>${src.source}</strong></td>
+                    <td><strong>${src.source.replace('_', ' ')}</strong></td>
                     <td><span class="${stateClass}">${src.state}</span></td>
-                    <td style="color: var(--text-secondary); font-size: 0.85rem;">${src.reason || '-'}</td>
+                    <td><strong style="color: var(--accent-color);">${evCount}</strong></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -742,7 +1075,9 @@
                 const res = await fetch(`${API_BASE}/works/${workId}/analytics`);
                 if (res.ok) {
                     const data = await res.json();
-                    renderEvidenceTable(data.evidence);
+                    allEvidenceCache = data.evidence || [];
+                    updateEvidenceCounts();
+                    renderFilteredEvidence();
                     renderCharts(data);
                 }
             } catch (e) {
@@ -750,20 +1085,61 @@
             }
         }
 
-        function renderEvidenceTable(evidence) {
+        function updateEvidenceCounts() {
+            const counts = { all: allEvidenceCache.length, academic: 0, policy: 0, social: 0, wiki: 0 };
+            allEvidenceCache.forEach(ev => {
+                const src = (ev.source || "").toLowerCase();
+                const st = (ev.source_type || "").toLowerCase();
+                if (src === "openalex" || src === "scopus" || src === "web_of_science" || st.includes("citation")) {
+                    counts.academic++;
+                } else if (src === "policy_documents" || src === "news" || src === "blogs") {
+                    counts.policy++;
+                } else if (src === "wikipedia" || src === "open_syllabus") {
+                    counts.wiki++;
+                } else {
+                    counts.social++;
+                }
+            });
+
+            document.getElementById("tab-count-all").innerText = counts.all;
+            document.getElementById("tab-count-academic").innerText = counts.academic;
+            document.getElementById("tab-count-policy").innerText = counts.policy;
+            document.getElementById("tab-count-social").innerText = counts.social;
+            document.getElementById("tab-count-wiki").innerText = counts.wiki;
+
+            document.getElementById("stat-policy-news").innerText = counts.policy;
+            document.getElementById("stat-policy-sub").innerText = `${allEvidenceCache.filter(e => e.source === 'policy_documents').length} Policy Docs`;
+            document.getElementById("stat-news-sub").innerText = `${allEvidenceCache.filter(e => e.source === 'news').length} News`;
+            document.getElementById("stat-wiki-sub").innerText = `${allEvidenceCache.filter(e => e.source === 'wikipedia').length} Wikipedia`;
+        }
+
+        function renderFilteredEvidence() {
             const tbody = document.getElementById("evidence-table-body");
             tbody.innerHTML = "";
-            if (!evidence || !evidence.length) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No mentions or citation records found.</td></tr>`;
+
+            const filtered = allEvidenceCache.filter(ev => {
+                if (activeFilterTab === "all") return true;
+                const src = (ev.source || "").toLowerCase();
+                const st = (ev.source_type || "").toLowerCase();
+                if (activeFilterTab === "academic") return (src === "openalex" || src === "scopus" || src === "web_of_science" || st.includes("citation"));
+                if (activeFilterTab === "policy") return (src === "policy_documents" || src === "news" || src === "blogs");
+                if (activeFilterTab === "wiki") return (src === "wikipedia" || src === "open_syllabus");
+                if (activeFilterTab === "social") return !(src === "openalex" || src === "scopus" || src === "web_of_science" || st.includes("citation") || src === "policy_documents" || src === "news" || src === "blogs" || src === "wikipedia" || src === "open_syllabus");
+                return true;
+            });
+
+            if (!filtered.length) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No items in this category.</td></tr>`;
                 return;
             }
 
-            evidence.forEach(ev => {
+            filtered.forEach(ev => {
                 const tr = document.createElement("tr");
+                const color = DONUT_COLORS[ev.source] || "#3b82f6";
                 tr.innerHTML = `
-                    <td>${new Date(ev.discovered_at).toLocaleDateString()}</td>
-                    <td><span class="badge badge-ready">${ev.source}</span></td>
-                    <td><a href="${ev.url}" target="_blank" style="color: var(--accent-color); text-decoration: none;">${ev.title || ev.url}</a></td>
+                    <td style="white-space: nowrap; color: var(--text-secondary);">${ev.published_at ? new Date(ev.published_at).toLocaleDateString() : new Date(ev.discovered_at).toLocaleDateString()}</td>
+                    <td><span class="badge" style="background: ${color}22; color: ${color}; border: 1px solid ${color}44;">${ev.source.replace('_', ' ')}</span></td>
+                    <td><a href="${ev.url}" target="_blank" style="color: var(--accent-color); text-decoration: none; font-weight: 500;">${ev.title || ev.url}</a></td>
                     <td><code>${ev.matched_identifier}</code></td>
                     <td><span style="font-size: 0.85rem; font-weight: 500;">${ev.match_confidence}</span></td>
                 `;
@@ -771,23 +1147,72 @@
             });
         }
 
-        // Render D3 Visual Charts
+        // Render Multi-Color Altmetric Donut
+        function renderAltmetricDonut(donutData) {
+            d3.select("#altmetric-donut-svg").selectAll("*").remove();
+            const legendContainer = document.getElementById("donut-legend-list");
+            legendContainer.innerHTML = "";
+
+            const svg = d3.select("#altmetric-donut-svg");
+            const width = 220;
+            const height = 220;
+            const radius = Math.min(width, height) / 2 - 10;
+
+            const g = svg.append("g").attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+            const slices = donutData.slices || [];
+            if (!slices.length) {
+                // Render empty single gray ring
+                const arc = d3.arc().innerRadius(radius * 0.7).outerRadius(radius).startAngle(0).endAngle(2 * Math.PI);
+                g.append("path").attr("d", arc).attr("fill", "var(--input-bg)").attr("stroke", "var(--border-color)");
+                legendContainer.innerHTML = `<div style="color: var(--text-secondary); font-size: 0.9rem;">No active online mentions recorded yet.</div>`;
+                return;
+            }
+
+            const pie = d3.pie().value(d => d.subscore).sort(null);
+            const arc = d3.arc().innerRadius(radius * 0.7).outerRadius(radius);
+
+            g.selectAll("path")
+                .data(pie(slices))
+                .enter().append("path")
+                .attr("d", arc)
+                .attr("fill", d => d.data.color || "#3b82f6")
+                .attr("stroke", "var(--bg-color)")
+                .attr("stroke-width", "3px");
+
+            // Render legend items
+            slices.forEach(s => {
+                const item = document.createElement("div");
+                item.className = "donut-source-item";
+                item.innerHTML = `
+                    <span style="display: flex; align-items: center;">
+                        <span class="donut-source-color-dot" style="background: ${s.color};"></span>
+                        <strong>${s.source.replace('_', ' ')}</strong>
+                    </span>
+                    <span style="font-weight: 700; color: var(--text-primary);">${s.subscore} pts (${s.percentage}%)</span>
+                `;
+                legendContainer.appendChild(item);
+            });
+        }
+
+        // Render D3 Visual Charts with Fixed High-Contrast Light/Dark Tooltips
         function renderCharts(data) {
-            // Clear existing elements inside SVGs
             d3.select("#pie-chart").selectAll("*").remove();
             d3.select("#timeline-chart").selectAll("*").remove();
 
             const sources = data.source_breakdown;
+            const tooltip = d3.select("#chart-tooltip-div");
+
             if (!sources || !sources.length) {
                 d3.select("#pie-chart").append("text")
-                    .attr("x", 150)
-                    .attr("y", 125)
+                    .attr("x", 170)
+                    .attr("y", 120)
                     .attr("text-anchor", "middle")
                     .attr("class", "no-data-msg")
                     .text("No active citation shares");
                 d3.select("#timeline-chart").append("text")
-                    .attr("x", 200)
-                    .attr("y", 125)
+                    .attr("x", 210)
+                    .attr("y", 120)
                     .attr("text-anchor", "middle")
                     .attr("class", "no-data-msg")
                     .text("No active timeline records");
@@ -798,37 +1223,31 @@
             const svgPie = d3.select("#pie-chart");
             const width = +svgPie.attr("width");
             const height = +svgPie.attr("height");
-            const radius = Math.min(width, height) / 2 - 20;
+            const radius = Math.min(width, height) / 2 - 15;
 
             const gPie = svgPie.append("g")
                 .attr("transform", `translate(${width / 2}, ${height / 2})`);
-
-            const color = d3.scaleOrdinal()
-                .domain(sources.map(d => d.source))
-                .range(["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"]);
 
             const pie = d3.pie()
                 .value(d => d.count)
                 .sort(null);
 
             const arc = d3.arc()
-                .innerRadius(radius * 0.5) // donut style
+                .innerRadius(radius * 0.55)
                 .outerRadius(radius);
 
-            const tooltip = d3.select("#chart-tooltip-div");
-
-            const path = gPie.selectAll("path")
+            gPie.selectAll("path")
                 .data(pie(sources))
                 .enter().append("path")
                 .attr("d", arc)
-                .attr("fill", d => color(d.data.source))
+                .attr("fill", d => DONUT_COLORS[d.data.source] || "#3b82f6")
                 .attr("stroke", "var(--bg-color)")
                 .attr("stroke-width", "2px")
                 .style("cursor", "pointer")
                 .on("mouseover", function(event, d) {
                     d3.select(this).transition().duration(100).attr("transform", "scale(1.05)");
                     tooltip.style("opacity", 1)
-                           .html(`<strong>${d.data.source}</strong>: ${d.data.count} citation(s)`);
+                           .html(`<strong>${d.data.source.replace('_', ' ')}</strong>: ${d.data.count} mention(s)`);
                 })
                 .on("mousemove", function(event) {
                     tooltip.style("left", (event.offsetX + 15) + "px")
@@ -839,14 +1258,14 @@
                     tooltip.style("opacity", 0);
                 });
 
-            // Center text total citations
+            // Center text total citations with responsive theme fill
             const total = d3.sum(sources, d => d.count);
             gPie.append("text")
                 .attr("text-anchor", "middle")
-                .attr("dy", "0.3em")
-                .style("fill", "#fff")
-                .style("font-size", "1.1rem")
-                .style("font-weight", "700")
+                .attr("dy", "0.35em")
+                .style("fill", "var(--text-primary)")
+                .style("font-size", "1.25rem")
+                .style("font-weight", "800")
                 .text(total);
 
             // --- 2. D3 TIMELINE BAR CHART ---
@@ -860,12 +1279,20 @@
             const gTimeline = svgTimeline.append("g")
                 .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-            const timelineData = data.timeline;
-            
-            // Map timeline counts to a flat sum for simplicity of bar chart y-axis
+            const timelineData = data.timeline || [];
             timelineData.forEach(d => {
                 d.totalVal = Object.values(d.counts).reduce((a, b) => a + b, 0);
             });
+
+            if (!timelineData.length) {
+                gTimeline.append("text")
+                    .attr("x", innerWidth / 2)
+                    .attr("y", innerHeight / 2)
+                    .attr("text-anchor", "middle")
+                    .attr("class", "no-data-msg")
+                    .text("No timeline records");
+                return;
+            }
 
             const xScale = d3.scaleBand()
                 .domain(timelineData.map(d => d.timestamp))
@@ -904,9 +1331,10 @@
                 .attr("width", xScale.bandwidth())
                 .attr("height", d => innerHeight - yScale(d.totalVal))
                 .attr("rx", 3)
+                .attr("fill", "var(--accent-color)")
                 .on("mouseover", function(event, d) {
                     tooltip.style("opacity", 1)
-                           .html(`<strong>${d.timestamp}</strong>: ${d.totalVal} citation(s)`);
+                           .html(`<strong>${d.timestamp}</strong>: ${d.totalVal} mention(s)`);
                 })
                 .on("mousemove", function(event) {
                     tooltip.style("left", (event.offsetX + 15) + "px")
@@ -925,14 +1353,12 @@
             const themeButtons = document.querySelectorAll('.theme-toggle-btn');
             const savedTheme = localStorage.getItem('theme') || 'dark';
             
-            // Set active button UI state
             themeButtons.forEach(btn => {
                 if (btn.getAttribute('data-theme-value') === savedTheme) {
                     btn.classList.add('active');
                 }
             });
 
-            // Listen for theme buttons click
             themeButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const theme = btn.getAttribute('data-theme-value');
@@ -954,7 +1380,6 @@
                 }
             }
 
-            // Sync with changes in system preference when system is selected
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
                 if (localStorage.getItem('theme') === 'system') {
                     document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
@@ -964,3 +1389,4 @@
     </script>
 </body>
 </html>
+
