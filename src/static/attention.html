@@ -452,9 +452,9 @@
             position: relative;
         }
 
-        /* Fixed Light / Dark Tooltip with High Contrast */
+        /* Global Fixed Tooltip with Pixel-Perfect Viewport Cursor Tracking */
         .chart-tooltip {
-            position: absolute;
+            position: fixed;
             background: var(--tooltip-bg);
             color: var(--tooltip-text);
             border: 1px solid var(--tooltip-border);
@@ -466,13 +466,14 @@
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.15s ease;
-            z-index: 100;
+            z-index: 9999;
         }
 
         .chart-tooltip strong {
             color: var(--tooltip-text);
             font-weight: 700;
         }
+
 
         /* Lists and Tables */
         .table-container {
@@ -823,7 +824,6 @@
                 </div>
                 <div class="chart-container">
                     <svg id="pie-chart" width="340" height="240"></svg>
-                    <div id="chart-tooltip-div" class="chart-tooltip"></div>
                 </div>
             </div>
 
@@ -871,6 +871,9 @@
         </div>
 
     </div>
+
+    <!-- Global Fixed Tooltip Floating Directly at Cursor -->
+    <div id="global-chart-tooltip" class="chart-tooltip"></div>
 
     <script>
         const API_BASE = "/api/v1/research-attention";
@@ -1147,11 +1150,12 @@
             });
         }
 
-        // Render Multi-Color Altmetric Donut
+        // Render Multi-Color Altmetric Donut with Cursor Tooltip
         function renderAltmetricDonut(donutData) {
             d3.select("#altmetric-donut-svg").selectAll("*").remove();
             const legendContainer = document.getElementById("donut-legend-list");
             legendContainer.innerHTML = "";
+            const tooltip = d3.select("#global-chart-tooltip");
 
             const svg = d3.select("#altmetric-donut-svg");
             const width = 220;
@@ -1162,7 +1166,6 @@
 
             const slices = donutData.slices || [];
             if (!slices.length) {
-                // Render empty single gray ring
                 const arc = d3.arc().innerRadius(radius * 0.7).outerRadius(radius).startAngle(0).endAngle(2 * Math.PI);
                 g.append("path").attr("d", arc).attr("fill", "var(--input-bg)").attr("stroke", "var(--border-color)");
                 legendContainer.innerHTML = `<div style="color: var(--text-secondary); font-size: 0.9rem;">No active online mentions recorded yet.</div>`;
@@ -1178,7 +1181,21 @@
                 .attr("d", arc)
                 .attr("fill", d => d.data.color || "#3b82f6")
                 .attr("stroke", "var(--bg-color)")
-                .attr("stroke-width", "3px");
+                .attr("stroke-width", "3px")
+                .style("cursor", "pointer")
+                .on("mouseover", function(event, d) {
+                    d3.select(this).transition().duration(100).attr("transform", "scale(1.05)");
+                    tooltip.style("opacity", 1)
+                           .html(`<strong>${d.data.source.replace('_', ' ')}</strong>: ${d.data.subscore} pts (${d.data.percentage}%)`);
+                })
+                .on("mousemove", function(event) {
+                    tooltip.style("left", (event.clientX + 14) + "px")
+                           .style("top", (event.clientY - 35) + "px");
+                })
+                .on("mouseout", function() {
+                    d3.select(this).transition().duration(100).attr("transform", "scale(1)");
+                    tooltip.style("opacity", 0);
+                });
 
             // Render legend items
             slices.forEach(s => {
@@ -1201,7 +1218,7 @@
             d3.select("#timeline-chart").selectAll("*").remove();
 
             const sources = data.source_breakdown;
-            const tooltip = d3.select("#chart-tooltip-div");
+            const tooltip = d3.select("#global-chart-tooltip");
 
             if (!sources || !sources.length) {
                 d3.select("#pie-chart").append("text")
@@ -1250,8 +1267,8 @@
                            .html(`<strong>${d.data.source.replace('_', ' ')}</strong>: ${d.data.count} mention(s)`);
                 })
                 .on("mousemove", function(event) {
-                    tooltip.style("left", (event.offsetX + 15) + "px")
-                           .style("top", (event.offsetY - 20) + "px");
+                    tooltip.style("left", (event.clientX + 14) + "px")
+                           .style("top", (event.clientY - 35) + "px");
                 })
                 .on("mouseout", function() {
                     d3.select(this).transition().duration(100).attr("transform", "scale(1)");
@@ -1337,13 +1354,14 @@
                            .html(`<strong>${d.timestamp}</strong>: ${d.totalVal} mention(s)`);
                 })
                 .on("mousemove", function(event) {
-                    tooltip.style("left", (event.offsetX + 15) + "px")
-                           .style("top", (event.offsetY - 20) + "px");
+                    tooltip.style("left", (event.clientX + 14) + "px")
+                           .style("top", (event.clientY - 35) + "px");
                 })
                 .on("mouseout", function() {
                     tooltip.style("opacity", 0);
                 });
         }
+
 
         // Run default lookup on start
         window.addEventListener("load", performSearch);
