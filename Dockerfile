@@ -11,9 +11,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set local work directory
 WORKDIR /app
 
-# Install dependencies first for optimal layer caching
+# Install CPU-only PyTorch first to avoid downloading ~5GB of NVIDIA CUDA/cuDNN GPU binaries
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+
+# Install application dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
 
 # Download the spaCy transformer pipeline
 RUN python -m spacy download en_core_web_trf
