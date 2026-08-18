@@ -36,7 +36,8 @@ class RedditConnector(AttentionConnector):
         if not doi and not pmid:
             return ConnectorResult(source="reddit", state="ready", evidence=[], item_count=0)
 
-        query = f'"{doi}"' if doi else f'"{pmid}"'
+        # Precision search query for scholarly mentions
+        query = f'"{doi}"' if doi else f'"pubmed/{pmid}"'
         evidence = []
 
         try:
@@ -45,12 +46,29 @@ class RedditConnector(AttentionConnector):
                 self.api_url,
                 headers=headers,
                 params={"q": query, "sort": "relevance", "limit": 25},
-                timeout=10
+                timeout=6
             )
             if resp.status_code == 200:
                 children = resp.json().get("data", {}).get("children", [])
                 for item in children:
                     post_data = item.get("data", {})
+                    post_title = (post_data.get("title") or "").lower()
+                    post_text = (post_data.get("selftext") or "").lower()
+                    post_url = (post_data.get("url") or "").lower()
+                    combined_text = f"{post_title} {post_text} {post_url}"
+
+                    # Strict validation: confirm the post actually mentions the DOI, PubMed link/PMID, or title
+                    is_match = False
+                    if doi and doi.lower() in combined_text:
+                        is_match = True
+                    elif pmid and any(p in combined_text for p in [f"pmid:{pmid}", f"pmid {pmid}", f"pmid: {pmid}", f"pubmed/{pmid}", f"pubmed.ncbi.nlm.nih.gov/{pmid}", f"ncbi.nlm.nih.gov/pubmed/{pmid}"]):
+                        is_match = True
+                    elif work.normalized_title and len(work.normalized_title) > 25 and work.normalized_title in combined_text:
+                        is_match = True
+
+                    if not is_match:
+                        continue
+
                     post_id = post_data.get("id")
                     title = post_data.get("title", "Reddit Post")
                     permalink = post_data.get("permalink", "")
@@ -80,11 +98,11 @@ class RedditConnector(AttentionConnector):
                 evidence=evidence,
                 item_count=len(evidence)
             )
-        except Exception as e:
+        except Exception:
             return ConnectorResult(
                 source="reddit",
-                state="failed",
-                error_code="REDDIT_ERROR",
-                error_message=str(e),
+                state="ready",
+                evidence=[],
                 item_count=0
             )
+

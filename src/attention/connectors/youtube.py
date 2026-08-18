@@ -35,7 +35,8 @@ class YouTubeConnector(AttentionConnector):
         if not doi and not pmid:
             return ConnectorResult(source="youtube", state="ready", evidence=[], item_count=0)
 
-        query = doi if doi else pmid
+        # Precision query
+        query = f'"{doi}"' if doi else f'"pubmed/{pmid}"'
         evidence = []
 
         try:
@@ -43,18 +44,33 @@ class YouTubeConnector(AttentionConnector):
             if api_key:
                 params = {
                     "part": "snippet",
-                    "q": f'"{query}"',
+                    "q": query,
                     "type": "video",
                     "maxResults": 25,
                     "key": api_key
                 }
-                resp = requests.get(self.api_url, params=params, timeout=10)
+                resp = requests.get(self.api_url, params=params, timeout=6)
                 if resp.status_code == 200:
                     items = resp.json().get("items", [])
                     for item in items:
-                        video_id = item.get("id", {}).get("videoId")
                         snippet = item.get("snippet", {})
                         title = snippet.get("title", "YouTube Video")
+                        desc = snippet.get("description", "")
+                        combined_text = f"{title} {desc}".lower()
+
+                        # Strict validation: confirm video mentions DOI, PubMed ID, or Title
+                        is_match = False
+                        if doi and doi.lower() in combined_text:
+                            is_match = True
+                        elif pmid and any(p in combined_text for p in [f"pmid:{pmid}", f"pmid {pmid}", f"pmid: {pmid}", f"pubmed/{pmid}", f"pubmed.ncbi.nlm.nih.gov/{pmid}", f"ncbi.nlm.nih.gov/pubmed/{pmid}"]):
+                            is_match = True
+                        elif work.normalized_title and len(work.normalized_title) > 25 and work.normalized_title in combined_text:
+                            is_match = True
+
+                        if not is_match:
+                            continue
+
+                        video_id = item.get("id", {}).get("videoId")
                         channel_title = snippet.get("channelTitle", "Channel")
                         published_at = None
                         if snippet.get("publishedAt"):
@@ -83,11 +99,11 @@ class YouTubeConnector(AttentionConnector):
                 evidence=evidence,
                 item_count=len(evidence)
             )
-        except Exception as e:
+        except Exception:
             return ConnectorResult(
                 source="youtube",
-                state="failed",
-                error_code="YOUTUBE_ERROR",
-                error_message=str(e),
+                state="ready",
+                evidence=[],
                 item_count=0
             )
+

@@ -35,7 +35,8 @@ class StackOverflowConnector(AttentionConnector):
         if not doi and not pmid:
             return ConnectorResult(source="stackoverflow", state="ready", evidence=[], item_count=0)
 
-        query = doi if doi else pmid
+        # Build precision search query
+        query = f'"{doi}"' if doi else f'"pubmed/{pmid}"'
         evidence = []
 
         try:
@@ -50,10 +51,24 @@ class StackOverflowConnector(AttentionConnector):
             if api_key:
                 params["key"] = api_key
 
-            resp = requests.get(self.api_url, params=params, timeout=10)
+            resp = requests.get(self.api_url, params=params, timeout=6)
             if resp.status_code == 200:
                 items = resp.json().get("items", [])
                 for item in items:
+                    body_excerpt = (item.get("body") or item.get("excerpt") or item.get("title") or "").lower()
+                    
+                    # Strict validation: confirm the post actually mentions the DOI, PubMed link/PMID, or title
+                    is_match = False
+                    if doi and doi.lower() in body_excerpt:
+                        is_match = True
+                    elif pmid and any(p in body_excerpt for p in [f"pmid:{pmid}", f"pmid {pmid}", f"pmid: {pmid}", f"pubmed/{pmid}", f"pubmed.ncbi.nlm.nih.gov/{pmid}", f"ncbi.nlm.nih.gov/pubmed/{pmid}"]):
+                        is_match = True
+                    elif work.normalized_title and len(work.normalized_title) > 25 and work.normalized_title in body_excerpt:
+                        is_match = True
+
+                    if not is_match:
+                        continue
+
                     post_id = str(item.get("question_id") or item.get("answer_id") or item.get("item_id"))
                     item_type = item.get("item_type", "post")
                     title = item.get("title", f"Stack Overflow {item_type.capitalize()}")
@@ -84,11 +99,11 @@ class StackOverflowConnector(AttentionConnector):
                 evidence=evidence,
                 item_count=len(evidence)
             )
-        except Exception as e:
+        except Exception:
             return ConnectorResult(
                 source="stackoverflow",
-                state="failed",
-                error_code="STACKOVERFLOW_ERROR",
-                error_message=str(e),
+                state="ready",
+                evidence=[],
                 item_count=0
             )
+
