@@ -665,10 +665,206 @@
             margin-bottom: 16px;
         }
 
-        .reset-container {
-            margin-top: 24px;
+        /* ==========================================================================
+           MODERN ON-PAGE SELF-HELP SYSTEM & GUIDED TOUR STYLES
+           ========================================================================== */
+        .info-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 17px;
+            height: 17px;
+            border-radius: 50%;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            position: relative;
+            vertical-align: middle;
+            margin-left: 6px;
+            transition: all 0.2s ease;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .info-btn:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .info-popover {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 270px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(16px);
+            color: var(--text-main);
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            box-shadow: 0 12px 32px var(--card-shadow);
+            font-size: 0.8rem;
+            font-weight: normal;
+            line-height: 1.45;
+            text-transform: none;
+            letter-spacing: normal;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+            z-index: 1000;
+            text-align: left;
+        }
+
+        .info-btn:hover .info-popover {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-4px);
+        }
+
+        .info-popover strong {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-bottom: 0.35rem;
+            font-weight: 700;
+        }
+
+        .floating-help-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            color: #fff;
+            border: none;
+            box-shadow: 0 8px 24px var(--card-shadow);
             display: flex;
-            justify-content: flex-end;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 900;
+            transition: all 0.25s ease;
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+
+        .floating-help-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .help-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .help-modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .help-modal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 760px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 24px 64px var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .help-modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .help-modal-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--text-main);
+        }
+
+        .help-modal-body {
+            padding: 1.75rem 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .help-search-box {
+            width: 100%;
+            padding: 0.75rem 1.25rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .help-guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .help-topic-item {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.1rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .tour-spotlight-highlight {
+            position: relative !important;
+            z-index: 2100 !important;
+            box-shadow: 0 0 0 6px var(--primary), 0 0 40px rgba(99, 102, 241, 0.5) !important;
+            border-radius: 14px !important;
+        }
+
+        .tour-popover-box {
+            position: absolute;
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            backdrop-filter: blur(20px);
+            border-radius: 14px;
+            padding: 1.5rem;
+            width: 340px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+            z-index: 2200;
+            color: var(--text-main);
         }
     </style>
 </head>
@@ -682,7 +878,15 @@
                 <p>Secure local-first analysis (PubMed & Europe PMC)</p>
             </div>
         </div>
-        <div style="display: flex; gap: 16px; align-items: center;">
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <button class="btn" onclick="openHelpModal()" style="padding: 6px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; background: var(--header-btn-bg); border: 1px solid var(--border-color); color: var(--text-main); box-shadow: none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                Help & Guide
+            </button>
+            <button class="btn" onclick="startTour()" style="padding: 6px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; background: rgba(99, 102, 241, 0.15); border: 1px solid var(--primary); color: #818cf8; box-shadow: none;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                Take Tour
+            </button>
             <a href="/" class="btn" style="padding: 6px 16px; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: var(--header-btn-bg); border: 1px solid var(--border-color); color: var(--text-main); box-shadow: none;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 Portal Hub
@@ -714,11 +918,15 @@
         <div id="upload-panel" class="glass-card">
             <div class="upload-area" id="drop-zone">
                 <span class="upload-icon">📄</span>
-                <h2 class="upload-title">Confidential File Upload</h2>
+                <h2 class="upload-title" style="display: flex; align-items: center; justify-content: center;">
+                    Confidential File Upload
+                    <button class="info-btn">i<span class="info-popover"><strong>In-Memory Processing</strong><span>Files are parsed exclusively in RAM. No document text or proprietary data is ever saved to disk or transmitted to third parties.</span></span></button>
+                </h2>
                 <p class="upload-subtitle">Drag and drop your PDF, DOCX or TXT file here. The document content is processed entirely in memory and never leaves this machine.</p>
                 <button class="btn" onclick="document.getElementById('file-input').click()">Select File</button>
                 <input type="file" id="file-input" accept=".pdf,.docx,.doc,.txt">
             </div>
+
 
             <!-- Scanning Status Display -->
             <div class="loading-container" id="loading-panel">
@@ -739,8 +947,11 @@
             <div class="results-header-summary">
                 
                 <!-- Risk Gauge Card -->
-                <div class="glass-card risk-gauge-card">
-                    <h3 style="margin-bottom: 20px; font-size: 16px; font-weight: 600;">Overall Risk Assessment</h3>
+                <div class="glass-card risk-gauge-card" id="tour-risk-card">
+                    <h3 style="margin-bottom: 20px; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center;">
+                        Overall Risk Assessment
+                        <button class="info-btn">i<span class="info-popover"><strong>Similarity Risk Index</strong><span>Combined percentage evaluating both verbatim copy-paste overlaps and high-scoring semantic paraphrases.</span></span></button>
+                    </h3>
                     <div class="risk-circle">
                         <svg class="circle-svg">
                             <circle class="circle-bg" cx="80" cy="80" r="70"></circle>
@@ -755,7 +966,7 @@
                 </div>
 
                 <!-- Document Info & Guardrails verification -->
-                <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div class="glass-card" id="tour-audit-card" style="display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
                         <h3 style="margin-bottom: 16px; font-size: 16px; font-weight: 600;">Analysis Details</h3>
                         <div class="info-grid">
@@ -782,6 +993,7 @@
                     <div class="audit-panel">
                         <div class="audit-title">
                             <span>🛡️</span> Data Privacy & Leak Audit
+                            <button class="info-btn">i<span class="info-popover"><strong>Zero-Leak Architecture</strong><span>Only non-sensitive topical search keywords are sent to PubMed/Europe PMC. Full text is strictly isolated in RAM.</span></span></button>
                         </div>
                         <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
                             The following anonymized keywords represent the <b>only</b> data transmitted to external servers (NCBI PubMed & Europe PMC) to find matching articles:
@@ -795,10 +1007,16 @@
             </div>
 
             <!-- Tabbed Comparison lists -->
-            <div class="glass-card">
+            <div class="glass-card" id="tour-tabs-card">
                 <div class="tab-menu">
-                    <button class="tab-btn active" onclick="switchTab(event, 'semantic-tab')">Semantic Paraphrasing Check (<span id="count-semantic">0</span>)</button>
-                    <button class="tab-btn" onclick="switchTab(event, 'verbatim-tab')">Verbatim Text Copying (<span id="count-verbatim">0</span>)</button>
+                    <button class="tab-btn active" onclick="switchTab(event, 'semantic-tab')">
+                        Semantic Paraphrasing Check (<span id="count-semantic">0</span>)
+                        <button class="info-btn" style="margin-left: 4px;">i<span class="info-popover"><strong>Dense Vector Paraphrasing</strong><span>Detects restated ideas with cosine similarity >= 0.85 using SentenceTransformers.</span></span></button>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab(event, 'verbatim-tab')">
+                        Verbatim Text Copying (<span id="count-verbatim">0</span>)
+                        <button class="info-btn" style="margin-left: 4px;">i<span class="info-popover"><strong>Verbatim Overlap</strong><span>Detects identical sequences of 7+ consecutive matching words (n-gram shingling).</span></span></button>
+                    </button>
                 </div>
 
                 <!-- Semantic Paraphrase matches -->
@@ -819,6 +1037,78 @@
 
         </div>
     </main>
+
+    <!-- Floating Help Button -->
+    <button class="floating-help-btn" onclick="openHelpModal()" title="Open Self-Help Guide & Tour">?</button>
+
+    <!-- Interactive Self-Help Modal & Guide Dictionary -->
+    <div id="help-modal-overlay" class="help-modal-overlay" onclick="closeHelpModalOnOutsideClick(event)">
+        <div class="help-modal-card">
+            <div class="help-modal-header">
+                <div class="help-modal-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    Plagiarism Checker Self-Help Guide
+                </div>
+                <button class="help-close-btn" onclick="closeHelpModal()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+            </div>
+            <div class="help-modal-body">
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <input type="text" id="help-search-input" class="help-search-box" placeholder="Search feature (e.g. Paraphrase, Verbatim, Privacy, Risk Index)..." onkeyup="filterHelpTopics()">
+                    <button class="btn" onclick="closeHelpModal(); startTour();" style="white-space: nowrap; padding: 0.75rem 1.25rem;">
+                        Start Tour
+                    </button>
+                </div>
+                
+                <div class="help-guide-grid" id="help-topics-container">
+                    <div class="help-topic-item" data-keywords="overall risk assessment percentage similarity low moderate high">
+                        <div class="help-topic-title" style="font-weight: 700; color: var(--primary);">
+                            <span>Overall Risk Assessment</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45;">Calculates cumulative sentence overlap and semantic similarity against peer-reviewed articles from PubMed and Europe PMC.</p>
+                    </div>
+
+                    <div class="help-topic-item" data-keywords="semantic paraphrasing sentence transformer dense vector cosine similarity">
+                        <div class="help-topic-title" style="font-weight: 700; color: var(--primary);">
+                            <span>Semantic Paraphrasing Check</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45;">Uses all-mpnet-base-v2 neural embeddings to find conceptual paraphrases and heavily rewritten sentences from published literature.</p>
+                    </div>
+
+                    <div class="help-topic-item" data-keywords="verbatim copy paste n-gram shingling exact matching">
+                        <div class="help-topic-title" style="font-weight: 700; color: var(--primary);">
+                            <span>Verbatim Text Copying</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45;">Detects exact word-for-word duplication (7+ consecutive identical words) and displays side-by-side snippet comparisons.</p>
+                    </div>
+
+                    <div class="help-topic-item" data-keywords="data privacy leak audit memory sandboxing confidential">
+                        <div class="help-topic-title" style="font-weight: 700; color: var(--primary);">
+                            <span>Data Privacy & Leak Audit</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45;">Audits all outbound queries to prove that proprietary paper contents remain in RAM and are never leaked to external servers.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tour Popover Container -->
+    <div id="tour-popover" class="tour-popover-box" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: var(--primary); background: rgba(99, 102, 241, 0.1); padding: 0.2rem 0.5rem; border-radius: 6px;" id="tour-step-indicator">Step 1 of 4</span>
+            <button onclick="endTour()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+        </div>
+        <h4 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem;" id="tour-title-text">Upload Document</h4>
+        <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.45; margin-bottom: 1.25rem;" id="tour-body-text">Drag and drop your research manuscript (.pdf, .docx, .txt). It is processed 100% in RAM.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button class="btn" onclick="endTour()" style="padding: 0.45rem 0.9rem; font-size: 0.8rem; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main);">Skip</button>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn" id="tour-prev-btn" onclick="prevTourStep()" style="padding: 0.45rem 0.9rem; font-size: 0.8rem; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main);">Back</button>
+                <button class="btn" id="tour-next-btn" onclick="nextTourStep()" style="padding: 0.45rem 0.9rem; font-size: 0.8rem;">Next</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         const dropZone = document.getElementById('drop-zone');
@@ -1170,6 +1460,134 @@
                 }
             });
         });
+
+        // ==========================================================================
+        // SELF-HELP MODAL & INTERACTIVE WALKTHROUGH TOUR CONTROLLER
+        // ==========================================================================
+        function openHelpModal() {
+            document.getElementById("help-modal-overlay").classList.add("active");
+            document.getElementById("help-search-input").value = "";
+            filterHelpTopics();
+            setTimeout(() => document.getElementById("help-search-input").focus(), 100);
+        }
+
+        function closeHelpModal() {
+            document.getElementById("help-modal-overlay").classList.remove("active");
+        }
+
+        function closeHelpModalOnOutsideClick(e) {
+            if (e.target.id === "help-modal-overlay") {
+                closeHelpModal();
+            }
+        }
+
+        function filterHelpTopics() {
+            const query = (document.getElementById("help-search-input").value || "").toLowerCase().trim();
+            const items = document.querySelectorAll(".help-topic-item");
+            items.forEach(item => {
+                const text = (item.textContent || "").toLowerCase();
+                const keywords = (item.getAttribute("data-keywords") || "").toLowerCase();
+                if (!query || text.includes(query) || keywords.includes(query)) {
+                    item.style.display = "flex";
+                } else {
+                    item.style.display = "none";
+                }
+            });
+        }
+
+        const PLAGIARISM_TOUR_STEPS = [
+            {
+                targetId: "drop-zone",
+                title: "1. Confidential Upload",
+                body: "Upload your research paper (.pdf, .docx, .txt). The file is processed strictly in memory and is never saved to disk or shared."
+            },
+            {
+                targetId: "tour-risk-card",
+                title: "2. Overall Risk Assessment",
+                body: "Displays aggregate similarity percentage and security tier: Low (<15%), Moderate (15-30%), or High Risk (>30%)."
+            },
+            {
+                targetId: "tour-audit-card",
+                title: "3. Zero-Leak Audit Log",
+                body: "Verifies the exact non-sensitive keywords sent to PubMed / Europe PMC, guaranteeing no confidential manuscript text leaves RAM."
+            },
+            {
+                targetId: "tour-tabs-card",
+                title: "4. Semantic & Verbatim Tabs",
+                body: "Compare conceptual paraphrasing (SentenceTransformer dense vectors) and verbatim copy-paste overlaps (n-gram shingling) side by side."
+            }
+        ];
+
+        let currentPlagiarismTourIdx = 0;
+
+        function startTour() {
+            const results = document.getElementById("results-panel");
+            if (results.style.display === "none" || !results.style.display) {
+                results.style.display = "block";
+            }
+            currentPlagiarismTourIdx = 0;
+            renderPlagiarismTourStep();
+        }
+
+        function renderPlagiarismTourStep() {
+            document.querySelectorAll(".tour-spotlight-highlight").forEach(el => el.classList.remove("tour-spotlight-highlight"));
+            
+            const step = PLAGIARISM_TOUR_STEPS[currentPlagiarismTourIdx];
+            const target = document.getElementById(step.targetId);
+            const popover = document.getElementById("tour-popover");
+            
+            if (!target) {
+                endTour();
+                return;
+            }
+
+            target.classList.add("tour-spotlight-highlight");
+            target.scrollIntoView({ behavior: "smooth", block: "center" });
+
+            popover.style.display = "block";
+            document.getElementById("tour-step-indicator").innerText = `Step ${currentPlagiarismTourIdx + 1} of ${PLAGIARISM_TOUR_STEPS.length}`;
+            document.getElementById("tour-title-text").innerText = step.title;
+            document.getElementById("tour-body-text").innerText = step.body;
+
+            document.getElementById("tour-prev-btn").style.display = currentPlagiarismTourIdx === 0 ? "none" : "block";
+            document.getElementById("tour-next-btn").innerText = currentPlagiarismTourIdx === PLAGIARISM_TOUR_STEPS.length - 1 ? "Finish" : "Next";
+
+            setTimeout(() => {
+                const rect = target.getBoundingClientRect();
+                const popoverWidth = 340;
+                let top = window.scrollY + rect.bottom + 12;
+                let left = window.scrollX + rect.left + (rect.width / 2) - (popoverWidth / 2);
+
+                if (left < 10) left = 10;
+                if (left + popoverWidth > window.innerWidth - 10) left = window.innerWidth - popoverWidth - 10;
+
+                popover.style.top = top + "px";
+                popover.style.left = left + "px";
+            }, 100);
+        }
+
+        function nextTourStep() {
+            if (currentPlagiarismTourIdx < PLAGIARISM_TOUR_STEPS.length - 1) {
+                currentPlagiarismTourIdx++;
+                renderPlagiarismTourStep();
+            } else {
+                endTour();
+            }
+        }
+
+        function prevTourStep() {
+            if (currentPlagiarismTourIdx > 0) {
+                currentPlagiarismTourIdx--;
+                renderPlagiarismTourStep();
+            }
+        }
+
+        function endTour() {
+            document.querySelectorAll(".tour-spotlight-highlight").forEach(el => el.classList.remove("tour-spotlight-highlight"));
+            const popover = document.getElementById("tour-popover");
+            if (popover) popover.style.display = "none";
+        }
     </script>
 </body>
 </html>
+

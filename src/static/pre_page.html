@@ -352,8 +352,12 @@
     <div class="ambient-glow-1"></div>
     <div class="ambient-glow-2"></div>
 
-    <!-- Theme Toggle Segmented Control -->
-    <div class="theme-toggle-wrapper">
+    <!-- Theme Toggle & Help Control -->
+    <div class="theme-toggle-wrapper" style="display: flex; gap: 12px; align-items: center;">
+        <button onclick="openHelpModal()" style="background: var(--toggle-bg); border: 1px solid var(--toggle-border); border-radius: 20px; padding: 6px 14px; font-size: 13px; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            Help & Guide
+        </button>
         <div class="theme-toggle-container">
             <button class="theme-toggle-btn" data-theme-value="light" title="Light Theme">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
@@ -366,6 +370,7 @@
             </button>
         </div>
     </div>
+
 
     <div class="portal-container">
         
@@ -434,8 +439,52 @@
 
     </div>
 
+    <!-- Interactive Self-Help Modal & Guide Dictionary -->
+    <div id="help-modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: center; justify-content: center;" onclick="closeHelpModalOnOutsideClick(event)">
+        <div style="background: var(--card-bg); border: 1px solid var(--border-color); backdrop-filter: blur(20px); border-radius: 16px; width: 90%; max-width: 720px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 24px 64px rgba(0,0,0,0.5); overflow: hidden;">
+            <div style="padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 0.6rem; color: var(--header-color);">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    Portal Suite Self-Help Guide
+                </div>
+                <button onclick="closeHelpModal()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer;">&times;</button>
+            </div>
+            <div style="padding: 1.75rem 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.25rem;">
+                <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5;">
+                    Welcome to the Life Sciences Research Suite. Select a module below or launch directly from the portal tiles:
+                </p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div style="background: var(--icon-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem;">
+                        <h4 style="color: var(--accent-blue); margin-bottom: 0.5rem; font-size: 1rem;">1. Plagiarism & Similarity</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45;">Upload research manuscripts (.pdf, .docx, .txt) for instant in-memory plagiarism and semantic similarity analysis against PubMed & Europe PMC.</p>
+                        <a href="/plagiarism" style="display: inline-block; margin-top: 0.75rem; font-size: 0.85rem; font-weight: 600; color: var(--accent-blue); text-decoration: none;">Launch Checker &rarr;</a>
+                    </div>
+                    <div style="background: var(--icon-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem;">
+                        <h4 style="color: var(--accent-green); margin-bottom: 0.5rem; font-size: 1rem;">2. Attention & Citations</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45;">Look up publications by PMID or DOI to inspect real-time independent citations, policy mentions, news, and 23 digital channels.</p>
+                        <a href="/attention" style="display: inline-block; margin-top: 0.75rem; font-size: 0.85rem; font-weight: 600; color: var(--accent-green); text-decoration: none;">Launch Dashboard &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Theme management logic -->
     <script>
+        function openHelpModal() {
+            document.getElementById("help-modal-overlay").style.display = "flex";
+        }
+
+        function closeHelpModal() {
+            document.getElementById("help-modal-overlay").style.display = "none";
+        }
+
+        function closeHelpModalOnOutsideClick(e) {
+            if (e.target.id === "help-modal-overlay") {
+                closeHelpModal();
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const themeButtons = document.querySelectorAll('.theme-toggle-btn');
             const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -477,6 +526,5 @@
             });
         });
     </script>
-
 </body>
 </html>

@@ -598,38 +598,338 @@
             align-items: center;
         }
 
-        .theme-toggle-btn {
-            background: none;
-            border: none;
-            width: 28px;
-            height: 28px;
+        /* ==========================================================================
+           MODERN ON-PAGE SELF-HELP SYSTEM & GUIDED TOUR STYLES
+           ========================================================================== */
+        
+        /* Interactive Info Icon Button */
+        .info-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            position: relative;
+            vertical-align: middle;
+            margin-left: 6px;
+            transition: all 0.2s ease;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .info-btn:hover {
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+            background: var(--stat-badge-bg);
+            transform: scale(1.1);
+        }
+
+        /* Contextual Info Popover Box */
+        .info-popover {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            background: var(--tooltip-bg);
+            border: 1px solid var(--tooltip-border);
+            color: var(--text-primary);
+            padding: 0.9rem 1.1rem;
+            border-radius: 10px;
+            box-shadow: 0 12px 32px var(--card-shadow);
+            font-size: 0.8rem;
+            font-weight: normal;
+            line-height: 1.45;
+            text-transform: none;
+            letter-spacing: normal;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+            z-index: 1000;
+            text-align: left;
+        }
+
+        .info-popover::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: var(--tooltip-bg) transparent transparent transparent;
+        }
+
+        .info-btn:hover .info-popover,
+        .info-btn:focus .info-popover {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-4px);
+        }
+
+        .info-popover strong {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            margin-bottom: 0.35rem;
+            font-weight: 700;
+        }
+
+        .info-popover span {
+            color: var(--text-secondary);
+            display: block;
+        }
+
+        /* Floating Quick Help Button */
+        .floating-help-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            color: #fff;
+            border: none;
+            box-shadow: 0 8px 24px var(--card-shadow);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--toggle-text-inactive);
             cursor: pointer;
-            transition: all 0.2s ease;
-            padding: 0;
+            z-index: 900;
+            transition: all 0.25s ease;
+            font-size: 1.25rem;
+            font-weight: 800;
         }
 
-        .theme-toggle-btn:hover {
-            color: var(--toggle-text);
-            background: rgba(255, 255, 255, 0.03);
+        .floating-help-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
         }
 
-        .theme-toggle-btn.active {
-            background: var(--toggle-active-bg);
-            color: var(--toggle-text);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        /* Help Modal & Drawer */
+        .help-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .theme-toggle-btn svg {
-            display: block;
-            pointer-events: none;
+        .help-modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .help-modal-card {
+            background: var(--card-bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 780px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 24px 64px var(--card-shadow);
+            overflow: hidden;
+            animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.95) translateY(10px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .help-modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .help-modal-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--text-primary);
+        }
+
+        .help-close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.25rem;
+            transition: color 0.2s;
+        }
+
+        .help-close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .help-modal-body {
+            padding: 1.75rem 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .help-search-box {
+            width: 100%;
+            padding: 0.75rem 1.25rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .help-search-box:focus {
+            border-color: var(--accent-color);
+        }
+
+        .help-guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .help-topic-item {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.1rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .help-topic-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .help-topic-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        /* Interactive Guided Tour Spotlight */
+        .tour-spotlight-highlight {
+            position: relative !important;
+            z-index: 2100 !important;
+            box-shadow: 0 0 0 6px var(--accent-color), 0 0 40px rgba(59, 130, 246, 0.5) !important;
+            border-radius: 14px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .tour-popover-box {
+            position: absolute;
+            background: var(--card-bg-elevated);
+            border: 2px solid var(--accent-color);
+            border-radius: 14px;
+            padding: 1.5rem;
+            width: 340px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+            z-index: 2200;
+            color: var(--text-primary);
+            animation: fadeIn 0.25s ease;
+        }
+
+        .tour-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .tour-step-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent-color);
+            background: var(--stat-badge-bg);
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+        }
+
+        .tour-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .tour-body {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+            margin-bottom: 1.25rem;
+        }
+
+        .tour-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tour-btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .tour-btn {
+            padding: 0.45rem 0.9rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .tour-btn-primary {
+            background: var(--accent-gradient);
+            color: #fff;
+            border: none;
+        }
+
+        .tour-btn:hover {
+            opacity: 0.9;
         }
     </style>
 </head>
+
 <body>
 
     <header>
@@ -637,7 +937,16 @@
             <h1>Research Attention Engine</h1>
             <p>Independent scholarly citation & digital attention footprint analytics</p>
         </div>
-        <div style="display: flex; gap: 16px; align-items: center;">
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <button class="back-btn" onclick="openHelpModal()" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                Help & Guide
+            </button>
+            <button class="back-btn" onclick="startTour()" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: var(--stat-badge-bg); color: var(--accent-color); border-color: var(--accent-color);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                Take Tour
+            </button>
+
             <!-- Theme Toggle Control -->
             <div class="theme-toggle-container">
                 <button class="theme-toggle-btn" data-theme-value="light" title="Light Theme">
@@ -662,8 +971,11 @@
     </header>
 
     <!-- Search Section -->
-    <div class="search-container">
-        <h2 class="search-title">Lookup Publication Attention Metrics</h2>
+    <div class="search-container" id="tour-search-container">
+        <h2 class="search-title" style="display: flex; align-items: center;">
+            Lookup Publication Attention Metrics
+            <button class="info-btn">i<span class="info-popover"><strong>Search Engine</strong><span>Enter a PubMed PMID (e.g. <code>33992</code>) or DOI. Resolves metadata and scans 23 channels in real time.</span></span></button>
+        </h2>
         <div class="search-box">
             <input type="text" id="query-input" class="search-input" placeholder="Enter PMID (e.g. 33992) or DOI (e.g. 10.1000/xyz)...">
             <button id="search-btn" class="search-btn">Analyze Work</button>
@@ -682,11 +994,12 @@
     <div id="dashboard-grid" class="dashboard-grid">
         
         <!-- 1. Research Attention Score & Donut Hero Card -->
-        <div class="card">
+        <div class="card" id="tour-score-card">
             <div class="card-header">
                 <h3 class="card-title">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     Research Attention Score & Benchmark
+                    <button class="info-btn">i<span class="info-popover"><strong>Attention Score Wheel</strong><span>Weighted score of public engagement, policy influence, news, and academic citations across 23 digital channels.</span></span></button>
                 </h3>
                 <span class="stat-pill" id="percentile-badge">High Influence</span>
             </div>
@@ -711,11 +1024,14 @@
         </div>
 
         <!-- 2. Rich Key Metrics Cards Row -->
-        <div class="cards-row">
+        <div class="cards-row" id="tour-metrics-row">
             <!-- Academic Citations Card -->
             <div class="stat-card">
                 <div class="stat-header">
-                    <span>Academic Citations</span>
+                    <span>
+                        Academic Citations
+                        <button class="info-btn">i<span class="info-popover"><strong>Academic Citations</strong><span>Inbound citing papers across OpenAlex and Scopus. Independent citations separate third-party works from author self-citations.</span></span></button>
+                    </span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                 </div>
                 <div class="stat-value" id="stat-citations-total">0</div>
@@ -728,7 +1044,10 @@
             <!-- Readership & Bookmarks Card -->
             <div class="stat-card">
                 <div class="stat-header">
-                    <span>Mendeley Readership</span>
+                    <span>
+                        Mendeley Readership
+                        <button class="info-btn">i<span class="info-popover"><strong>Mendeley Readership</strong><span>Total number of scholars, students, and clinicians who have saved this publication into their reference manager.</span></span></button>
+                    </span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                 </div>
                 <div class="stat-value" id="stat-mendeley-readers">0</div>
@@ -740,7 +1059,10 @@
             <!-- Public & Policy Influence Card -->
             <div class="stat-card">
                 <div class="stat-header">
-                    <span>Policy & News Influence</span>
+                    <span>
+                        Policy & News Influence
+                        <button class="info-btn">i<span class="info-popover"><strong>Policy & Public Impact</strong><span>Citations in government & WHO guidelines, mainstream global news, and Wikipedia articles.</span></span></button>
+                    </span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                 </div>
                 <div class="stat-value" id="stat-policy-news">0</div>
@@ -752,7 +1074,10 @@
             <!-- Unique Contributors Card -->
             <div class="stat-card">
                 <div class="stat-header">
-                    <span>Unique Contributors</span>
+                    <span>
+                        Unique Contributors
+                        <button class="info-btn">i<span class="info-popover"><strong>Unique Contributors</strong><span>Distinct people, journalists, and research organizations actively discussing this work.</span></span></button>
+                    </span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path></svg>
                 </div>
                 <div class="stat-value" id="stat-contributors">0</div>
@@ -763,11 +1088,14 @@
         </div>
 
         <!-- 3. Two Columns: Canonical Work Info & Connector Sync Status -->
-        <div class="two-col-grid">
+        <div class="two-col-grid" id="tour-coverage-row">
             <!-- Work Metadata Details Card -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Canonical Publication Info</h3>
+                    <h3 class="card-title">
+                        Canonical Publication Info
+                        <button class="info-btn">i<span class="info-popover"><strong>Canonical Metadata</strong><span>Verified metadata resolved from PubMed and DOI authority registries.</span></span></button>
+                    </h3>
                 </div>
                 <div class="metadata-list">
                     <span class="metadata-label">Title</span>
@@ -796,7 +1124,10 @@
             <!-- Connector Status & Sync Status Card -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Connector Scope & Coverage (23 Channels)</h3>
+                    <h3 class="card-title">
+                        Connector Scope & Coverage (23 Channels)
+                        <button class="info-btn">i<span class="info-popover"><strong>Connector Ingestion Status</strong><span>Real-time crawler status for all 23 channels. Click 'Force Sync' to trigger a background refresh.</span></span></button>
+                    </h3>
                     <button id="force-refresh-btn" class="refresh-row-btn">Force Sync</button>
                 </div>
                 <div class="table-container" style="max-height: 280px; overflow-y: auto;">
@@ -817,11 +1148,14 @@
         </div>
 
         <!-- 4. Visual Analytics: Attention Share & Timeline -->
-        <div class="two-col-grid">
+        <div class="two-col-grid" id="tour-analytics-row">
             <!-- Source Breakdown Bar / Pie -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Attention Distribution by Channel</h3>
+                    <h3 class="card-title">
+                        Attention Distribution by Channel
+                        <button class="info-btn">i<span class="info-popover"><strong>Channel Distribution Chart</strong><span>Interactive D3 Pie Chart displaying the relative proportion of digital attention by channel.</span></span></button>
+                    </h3>
                 </div>
                 <div class="chart-container">
                     <svg id="pie-chart" width="340" height="240"></svg>
@@ -831,7 +1165,10 @@
             <!-- Attention Timeline -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Cumulative Attention Timeline</h3>
+                    <h3 class="card-title">
+                        Cumulative Attention Timeline
+                        <button class="info-btn">i<span class="info-popover"><strong>Attention Timeline Chart</strong><span>Monthly attention velocity showing when citations, news articles, and posts were published.</span></span></button>
+                    </h3>
                 </div>
                 <div class="chart-container">
                     <svg id="timeline-chart" width="420" height="240"></svg>
@@ -840,9 +1177,12 @@
         </div>
 
         <!-- 5. Tabbed Evidence Explorer -->
-        <div class="card">
+        <div class="card" id="tour-evidence-card">
             <div class="card-header">
-                <h3 class="card-title">Digital Evidence & Inbound Citation Explorer</h3>
+                <h3 class="card-title">
+                    Digital Evidence & Inbound Citation Explorer
+                    <button class="info-btn">i<span class="info-popover"><strong>Evidence Log</strong><span>Filter citations and digital mentions by category. Click any title to open the citing paper directly.</span></span></button>
+                </h3>
             </div>
             
             <div class="tab-bar" id="evidence-tabs">
@@ -873,8 +1213,100 @@
 
     </div>
 
+    <!-- Floating Help Button -->
+    <button class="floating-help-btn" onclick="openHelpModal()" title="Open Self-Help Guide & Tour">?</button>
+
     <!-- Global Fixed Tooltip Floating Directly at Cursor -->
     <div id="global-chart-tooltip" class="chart-tooltip"></div>
+
+    <!-- Interactive Self-Help Modal & Guide Dictionary -->
+    <div id="help-modal-overlay" class="help-modal-overlay" onclick="closeHelpModalOnOutsideClick(event)">
+        <div class="help-modal-card">
+            <div class="help-modal-header">
+                <div class="help-modal-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    Self-Help Knowledge Base & Guide
+                </div>
+                <button class="help-close-btn" onclick="closeHelpModal()">&times;</button>
+            </div>
+            <div class="help-modal-body">
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <input type="text" id="help-search-input" class="help-search-box" placeholder="Search metric, field, or channel (e.g. Mendeley, Self-Citation, Force Sync)..." onkeyup="filterHelpTopics()">
+                    <button class="search-btn" onclick="closeHelpModal(); startTour();" style="white-space: nowrap; padding: 0.75rem 1.25rem;">
+                        Start Tour
+                    </button>
+                </div>
+                
+                <div class="help-guide-grid" id="help-topics-container">
+                    <div class="help-topic-item" data-keywords="research attention score donut wheel formula weighting points">
+                        <div class="help-topic-title">
+                            <span>Research Attention Score</span>
+                            <span class="stat-pill">Metric</span>
+                        </div>
+                        <p class="help-topic-desc">A weighted cumulative score reflecting broad public engagement, government policy impact, mainstream news coverage, and scholarly citations across 23 digital channels.</p>
+                    </div>
+
+                    <div class="help-topic-item" data-keywords="academic citations independent author self-citation openalex scopus">
+                        <div class="help-topic-title">
+                            <span>Independent vs. Self-Citations</span>
+                            <span class="stat-pill">Citations</span>
+                        </div>
+                        <p class="help-topic-desc">Independent citations are third-party papers that cite this work with no shared authors. Self-citations are citations written by the publication's own authors.</p>
+                    </div>
+
+                    <div class="help-topic-item" data-keywords="mendeley readership bookmarks library readers">
+                        <div class="help-topic-title">
+                            <span>Mendeley Readership</span>
+                            <span class="stat-pill">Readership</span>
+                        </div>
+                        <p class="help-topic-desc">Tracks the total number of researchers, clinicians, and students who have saved and bookmarked the paper in their Mendeley reference libraries.</p>
+                    </div>
+
+                    <div class="help-topic-item" data-keywords="policy documents who cdc guidelines public health government">
+                        <div class="help-topic-title">
+                            <span>Policy Documents</span>
+                            <span class="stat-pill">Policy</span>
+                        </div>
+                        <p class="help-topic-desc">Citations found within clinical guidelines and health policy whitepapers published by organizations like the World Health Organization (WHO) and CDC.</p>
+                    </div>
+
+                    <div class="help-topic-item" data-keywords="coverage table 23 channels force sync recrawl queued ready running">
+                        <div class="help-topic-title">
+                            <span>Connector Scope & Force Sync</span>
+                            <span class="stat-pill">Operations</span>
+                        </div>
+                        <p class="help-topic-desc">Displays live crawling status for all 23 channels. Click <strong>Force Sync</strong> to schedule an instant background recrawl of all external sources.</p>
+                    </div>
+
+                    <div class="help-topic-item" data-keywords="evidence explorer tabs filters academic policy news social discussions wikipedia">
+                        <div class="help-topic-title">
+                            <span>Digital Evidence Explorer</span>
+                            <span class="stat-pill">Evidence</span>
+                        </div>
+                        <p class="help-topic-desc">An interactive searchable log of all verified citing articles, news stories, and discussions. Click any row title to open the external reference page directly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tour Popover Container -->
+    <div id="tour-popover" class="tour-popover-box" style="display: none;">
+        <div class="tour-header">
+            <span class="tour-step-badge" id="tour-step-indicator">Step 1 of 6</span>
+            <button onclick="endTour()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
+        </div>
+        <h4 class="tour-title" id="tour-title-text">Search Publication</h4>
+        <p class="tour-body" id="tour-body-text">Enter any PubMed ID or DOI to analyze attention metrics in real time.</p>
+        <div class="tour-actions">
+            <button class="tour-btn" onclick="endTour()">Skip</button>
+            <div class="tour-btn-group">
+                <button class="tour-btn" id="tour-prev-btn" onclick="prevTourStep()">Back</button>
+                <button class="tour-btn tour-btn-primary" id="tour-next-btn" onclick="nextTourStep()">Next</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         const API_BASE = "/api/v1/research-attention";
@@ -1369,6 +1801,149 @@
         }
 
 
+        // ==========================================================================
+        // SELF-HELP MODAL & INTERACTIVE WALKTHROUGH TOUR CONTROLLER
+        // ==========================================================================
+        
+        function openHelpModal() {
+            document.getElementById("help-modal-overlay").classList.add("active");
+            document.getElementById("help-search-input").value = "";
+            filterHelpTopics();
+            setTimeout(() => document.getElementById("help-search-input").focus(), 100);
+        }
+
+        function closeHelpModal() {
+            document.getElementById("help-modal-overlay").classList.remove("active");
+        }
+
+        function closeHelpModalOnOutsideClick(e) {
+            if (e.target.id === "help-modal-overlay") {
+                closeHelpModal();
+            }
+        }
+
+        function filterHelpTopics() {
+            const query = (document.getElementById("help-search-input").value || "").toLowerCase().trim();
+            const items = document.querySelectorAll(".help-topic-item");
+            items.forEach(item => {
+                const text = (item.textContent || "").toLowerCase();
+                const keywords = (item.getAttribute("data-keywords") || "").toLowerCase();
+                if (!query || text.includes(query) || keywords.includes(query)) {
+                    item.style.display = "flex";
+                } else {
+                    item.style.display = "none";
+                }
+            });
+        }
+
+        // Tour Steps Definition
+        const TOUR_STEPS = [
+            {
+                targetId: "tour-search-container",
+                title: "1. Search by PMID or DOI",
+                body: "Enter any PubMed PMID (e.g. 33992) or DOI (e.g. 10.1000/xyz) and press Enter or 'Analyze Work'. The engine resolves identity metadata in real time."
+            },
+            {
+                targetId: "tour-score-card",
+                title: "2. Research Attention Score & Wheel",
+                body: "Visualizes the total weighted attention score. The interactive donut ring segments and color-codes shares across News, Policy, OpenAlex, Scopus, Blogs, Twitter, and Wikipedia."
+            },
+            {
+                targetId: "tour-metrics-row",
+                title: "3. Benchmark Impact Cards",
+                body: "Tracks verified metrics: Independent citations (third-party citing works), Mendeley readership bookmarks, public health policy mentions, and unique contributors."
+            },
+            {
+                targetId: "tour-coverage-row",
+                title: "4. Canonical Metadata & 23 Channels",
+                body: "Displays official publication records and live crawler ingestion status across all 23 channels. Click 'Force Sync' anytime to schedule a fresh live refresh."
+            },
+            {
+                targetId: "tour-analytics-row",
+                title: "5. D3 Visual Analytics",
+                body: "Interactive charts revealing relative channel distribution and monthly cumulative attention timeline over time with cursor-tracking tooltips."
+            },
+            {
+                targetId: "tour-evidence-card",
+                title: "6. Digital Evidence & Inbound Citations",
+                body: "Filter citations and digital mentions by category. Click any row title to open the external reference or citing paper directly."
+            }
+        ];
+
+        let currentTourIndex = 0;
+
+        function startTour() {
+            // If dashboard is hidden, ensure dashboard is temporarily visible for the tour
+            const dashboard = document.getElementById("dashboard-grid");
+            if (dashboard.style.display === "none" || !dashboard.style.display) {
+                dashboard.style.display = "flex";
+            }
+            currentTourIndex = 0;
+            renderTourStep();
+        }
+
+        function renderTourStep() {
+            // Remove previous spotlight
+            document.querySelectorAll(".tour-spotlight-highlight").forEach(el => el.classList.remove("tour-spotlight-highlight"));
+            
+            const step = TOUR_STEPS[currentTourIndex];
+            const target = document.getElementById(step.targetId);
+            const popover = document.getElementById("tour-popover");
+            
+            if (!target) {
+                endTour();
+                return;
+            }
+
+            target.classList.add("tour-spotlight-highlight");
+            target.scrollIntoView({ behavior: "smooth", block: "center" });
+
+            popover.style.display = "block";
+            document.getElementById("tour-step-indicator").innerText = `Step ${currentTourIndex + 1} of ${TOUR_STEPS.length}`;
+            document.getElementById("tour-title-text").innerText = step.title;
+            document.getElementById("tour-body-text").innerText = step.body;
+
+            document.getElementById("tour-prev-btn").style.display = currentTourIndex === 0 ? "none" : "block";
+            document.getElementById("tour-next-btn").innerText = currentTourIndex === TOUR_STEPS.length - 1 ? "Finish" : "Next";
+
+            // Position popover
+            setTimeout(() => {
+                const rect = target.getBoundingClientRect();
+                const popoverWidth = 340;
+                let top = window.scrollY + rect.bottom + 12;
+                let left = window.scrollX + rect.left + (rect.width / 2) - (popoverWidth / 2);
+
+                // Prevent overflow
+                if (left < 10) left = 10;
+                if (left + popoverWidth > window.innerWidth - 10) left = window.innerWidth - popoverWidth - 10;
+
+                popover.style.top = top + "px";
+                popover.style.left = left + "px";
+            }, 100);
+        }
+
+        function nextTourStep() {
+            if (currentTourIndex < TOUR_STEPS.length - 1) {
+                currentTourIndex++;
+                renderTourStep();
+            } else {
+                endTour();
+            }
+        }
+
+        function prevTourStep() {
+            if (currentTourIndex > 0) {
+                currentTourIndex--;
+                renderTourStep();
+            }
+        }
+
+        function endTour() {
+            document.querySelectorAll(".tour-spotlight-highlight").forEach(el => el.classList.remove("tour-spotlight-highlight"));
+            const popover = document.getElementById("tour-popover");
+            if (popover) popover.style.display = "none";
+        }
+
         // Check for URL query params on start (e.g. ?q=33992 or ?pmid=33992)
         window.addEventListener("load", () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1378,7 +1953,6 @@
                 performSearch();
             }
         });
-
 
         // Theme management logic
         document.addEventListener('DOMContentLoaded', () => {
@@ -1421,4 +1995,5 @@
     </script>
 </body>
 </html>
+
 
