@@ -71,22 +71,25 @@ class ScopusConnector(AttentionConnector):
                                 pass
 
 
-                        link = None
+                        citedby_link = None
                         for l in entry.get("link", []):
-                            if l.get("@ref") == "scopus":
-                                link = l.get("@href")
+                            if l.get("@ref") == "scopus-citedby":
+                                citedby_link = l.get("@href")
+                            elif not citedby_link and l.get("@ref") == "scopus":
+                                citedby_link = l.get("@href")
 
                         evidence.append({
                             "source": "scopus",
                             "source_type": "citation_record",
                             "external_id": str(scopus_id),
-                            "url": link or f"https://www.scopus.com/record/display.uri?eid={scopus_id}",
-                            "title": f"{title} (Citations: {citedby_count})",
+                            "url": citedby_link or f"https://www.scopus.com/record/display.uri?eid={scopus_id}",
+                            "title": f"Scopus Inbound Citations ({citedby_count} citing articles)",
                             "published_at": pub_date,
                             "matched_identifier": f"doi:{doi}" if doi else f"pmid:{pmid}",
                             "match_confidence": "exact_identifier",
                             "raw_reference_json": {**entry, "citation_count": citedby_count}
                         })
+
 
             return ConnectorResult(
                 source="scopus",

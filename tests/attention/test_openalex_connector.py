@@ -61,7 +61,8 @@ class TestOpenAlexConnector(unittest.TestCase):
         result = self.connector.collect(self.work)
         self.assertEqual(result.state, "ready")
         self.assertEqual(len(result.evidence), 1)
-        self.assertEqual(result.evidence[0]["title"], "Citing paper 1")
+        self.assertEqual(result.evidence[0]["title"], "Cited in: Citing paper 1")
+
         self.assertEqual(result.evidence[0]["url"], "10.1000/citing1")
 
     @patch("src.config.RESEARCH_ATTENTION_ENABLE_OPENALEX", False)

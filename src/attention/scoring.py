@@ -57,6 +57,31 @@ DONUT_COLORS: Dict[str, str] = {
     "crossref_event": "#8073ac"
 }
 
+def get_normalized_last_name(name: str) -> str:
+    """
+    Extracts canonical lower-case last name for author matching.
+    Handles 'Liegel, John', 'John Liegel', 'Liegel J', 'Liegel'.
+    """
+    name = name.strip().lower()
+    if "," in name:
+        return name.split(",")[0].strip()
+    parts = name.split()
+    if len(parts) > 1 and len(parts[-1]) > 1:
+        return parts[-1]
+    return parts[0]
+
+def check_self_citation(work_authors: List[str], citing_authors: List[str]) -> bool:
+    """
+    Returns True if any author of the citing paper matches an author of the original work.
+    """
+    if not work_authors or not citing_authors:
+        return False
+    work_last_names = {get_normalized_last_name(a) for a in work_authors if a}
+    for ca in citing_authors:
+        if get_normalized_last_name(ca) in work_last_names:
+            return True
+    return False
+
 def extract_author_identifier(evidence_item: Dict[str, Any]) -> str:
     """
     Extracts or derives a unique author / poster identifier for Volume deduplication.
@@ -94,7 +119,8 @@ def extract_author_identifier(evidence_item: Dict[str, Any]) -> str:
 
 class AltmetricScoreCalculator:
     """
-    Implements the Altmetric Attention Score algorithm and donut breakdown (Table 2 & Figure 1).
+    Implements the Altmetric Attention Score algorithm, author volume deduplication,
+    and self-citation vs independent citation isolation (Table 2 & Figure 1).
     """
 
     @classmethod
@@ -105,6 +131,7 @@ class AltmetricScoreCalculator:
         - Source-level weighting (Table 2: Sources)
         - Unique author per source volume deduplication (Table 2: Volume)
         - Donut color representation mapping (Figure 1)
+        - Separation of independent citations and author self-citations
         """
         # Deduplicate mentions per author per source
         source_authors: Dict[str, set] = defaultdict(set)
@@ -114,6 +141,8 @@ class AltmetricScoreCalculator:
         # Readers and citations are tracked alongside attention score
         mendeley_readers = 0
         citation_counts = 0
+        independent_citations = 0
+        self_citations = 0
 
         for item in evidence_list:
             # Only consider active evidence
@@ -121,17 +150,25 @@ class AltmetricScoreCalculator:
                 continue
 
             source = (item.get("source") or "unknown").lower()
+            source_type = (item.get("source_type") or "").lower()
+            raw = item.get("raw_reference_json") or {}
             
-            # Special category tracking
+            # Special category tracking: Readership
             if source == "mendeley":
-                raw = item.get("raw_reference_json") or {}
                 readers = raw.get("reader_count", 1) if isinstance(raw, dict) else 1
                 mendeley_readers += int(readers)
                 continue
-            elif source in ("scopus", "web_of_science"):
-                raw = item.get("raw_reference_json") or {}
-                cites = raw.get("citation_count", 1) if isinstance(raw, dict) else 1
-                citation_counts += int(cites)
+
+            # Special category tracking: Academic Citations (OpenAlex, Scopus, Web of Science, CrossRef)
+            if source_type in ("citation", "academic_citation", "citation_record") or source in ("scopus", "web_of_science", "openalex"):
+                is_self = raw.get("is_self_citation", False) if isinstance(raw, dict) else False
+                count = raw.get("citation_count", 1) if isinstance(raw, dict) and "citation_count" in raw else 1
+                
+                citation_counts += int(count)
+                if is_self:
+                    self_citations += int(count)
+                else:
+                    independent_citations += int(count)
                 continue
 
             author_id = extract_author_identifier(item)
@@ -173,6 +210,9 @@ class AltmetricScoreCalculator:
             "metrics": {
                 "mendeley_readers": mendeley_readers,
                 "citation_counts": citation_counts,
+                "independent_citations": independent_citations,
+                "self_citations": self_citations,
                 "total_unique_contributors": sum(len(authors) for authors in source_authors.values())
             }
         }
+

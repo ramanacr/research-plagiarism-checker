@@ -62,9 +62,10 @@ class TestCrossrefEventConnector(unittest.TestCase):
         result = self.connector.collect(self.work)
         self.assertEqual(result.state, "ready")
         
-        self.assertEqual(len(result.evidence), 2)
+        self.assertEqual(len(result.evidence), 1)
         self.assertEqual(result.evidence[0]["external_id"], "10.1000/dataset_001")
-        self.assertEqual(result.evidence[0]["source_type"], "relation")
+        self.assertEqual(result.evidence[0]["source_type"], "inbound_relation")
+
 
 
     @patch("src.config.RESEARCH_ATTENTION_ENABLE_CROSSREF_EVENT", False)

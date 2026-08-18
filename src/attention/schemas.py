@@ -69,7 +69,10 @@ class AltmetricDonutDetails(BaseModel):
 class AltmetricScoreMetrics(BaseModel):
     mendeley_readers: int = 0
     citation_counts: int = 0
+    independent_citations: int = 0
+    self_citations: int = 0
     total_unique_contributors: int = 0
+
 
 class AltmetricScoreDetails(BaseModel):
     score: float
