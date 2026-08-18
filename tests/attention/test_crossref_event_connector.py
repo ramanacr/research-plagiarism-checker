@@ -39,18 +39,20 @@ class TestCrossrefEventConnector(unittest.TestCase):
         mock_response.status_code = 200
         mock_response.json.return_value = {
             "message": {
-                "events": [
+                "relation": {
+                    "is-supplemented-by": [
+                        {
+                            "id": "10.1000/dataset_001",
+                            "id-type": "doi",
+                            "asserted-by": "subject"
+                        }
+                    ]
+                },
+                "assertion": [
                     {
-                        "id": "event_001",
-                        "subj_id": "https://scienceblog.org/paper-review",
-                        "source_id": "blogs",
-                        "occurred_at": "2026-07-10T14:30:00Z"
-                    },
-                    {
-                        "id": "event_002",
-                        "subj_id": "https://en.wikipedia.org/wiki/Paper",
-                        "source_id": "wikipedia",
-                        "occurred_at": "2026-07-10T14:30:00Z"
+                        "name": "articlelink",
+                        "label": "Publisher maintained version",
+                        "value": "https://doi.org/10.1000/example"
                     }
                 ]
             }
@@ -60,10 +62,10 @@ class TestCrossrefEventConnector(unittest.TestCase):
         result = self.connector.collect(self.work)
         self.assertEqual(result.state, "ready")
         
-        # Should filter out the wikipedia mention and keep the blog mention
-        self.assertEqual(len(result.evidence), 1)
-        self.assertEqual(result.evidence[0]["external_id"], "event_001")
-        self.assertEqual(result.evidence[0]["source"], "blogs")
+        self.assertEqual(len(result.evidence), 2)
+        self.assertEqual(result.evidence[0]["external_id"], "10.1000/dataset_001")
+        self.assertEqual(result.evidence[0]["source_type"], "relation")
+
 
     @patch("src.config.RESEARCH_ATTENTION_ENABLE_CROSSREF_EVENT", False)
     def test_collect_disabled(self):

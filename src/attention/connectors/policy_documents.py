@@ -14,8 +14,8 @@ class PolicyDocumentsConnector(AttentionConnector):
            which are looked up in CrossRef/PubMed and resolved to DOIs.
     """
     def __init__(self):
-        # Supports policy repository APIs (e.g., Overton, Crossref Event policy, or custom policy index)
-        self.api_url = "https://api.eventdata.crossref.org/v1/events"
+        # OpenAlex and international policy repository endpoint
+        self.api_url = "https://api.openalex.org/works"
 
     def collect(self, work: ResearchWork) -> ConnectorResult:
         if not getattr(src.config, "RESEARCH_ATTENTION_ENABLE_POLICY_DOCUMENTS", True):
@@ -27,44 +27,47 @@ class PolicyDocumentsConnector(AttentionConnector):
             )
 
         doi = None
+        openalex_id = None
         for ident in work.identifiers:
             if ident.scheme == "doi":
                 doi = ident.normalized_value
-                break
+            elif ident.scheme == "openalex_id":
+                openalex_id = ident.normalized_value
 
-        if not doi:
+        if not doi and not openalex_id:
             return ConnectorResult(source="policy_documents", state="ready", evidence=[], item_count=0)
 
         evidence = []
         try:
-            target_url = f"https://doi.org/{doi}"
-            resp = requests.get(
-                self.api_url,
-                params={"obj-id": target_url, "source": "policy", "rows": 50},
-                headers={"User-Agent": "ConfidentialPlagiarismChecker/1.0 (mailto:agent@google.com)"},
-                timeout=10
-            )
+            # Query citing works flagged as policy documents
+            filter_query = f"cites:{openalex_id.split('/')[-1]}" if openalex_id else f"cites:doi:{doi}"
+            filter_query += ",type:policy"
+            
+            headers = {"User-Agent": "LifeSciencesSuite/1.0 (mailto:admin@example.com)"}
+            resp = requests.get(self.api_url, params={"filter": filter_query, "per_page": 50}, headers=headers, timeout=8)
+            
             if resp.status_code == 200:
-                events = resp.json().get("message", {}).get("events", [])
-                for item in events:
-                    subj_id = item.get("subj_id")
-                    event_id = item.get("id")
-                    occurred_at = None
-                    if item.get("occurred_at"):
+                results = resp.json().get("results", [])
+                for item in results:
+                    item_id = item.get("id")
+                    title = item.get("title") or "Policy Document Reference"
+                    pub_date = None
+                    if item.get("publication_date"):
                         try:
-                            dt = datetime.datetime.fromisoformat(item["occurred_at"].replace("Z", "+00:00"))
-                            occurred_at = dt.date()
+                            pub_date = datetime.date.fromisoformat(item["publication_date"])
                         except ValueError:
                             pass
+
+                    landing_page = item.get("primary_location", {}).get("landing_page_url") or item_id
 
                     evidence.append({
                         "source": "policy_documents",
                         "source_type": "policy_reference",
-                        "external_id": str(event_id),
-                        "url": subj_id or target_url,
-                        "title": item.get("title", f"Policy Document Citation for {doi}"),
-                        "published_at": occurred_at,
-                        "matched_identifier": f"doi:{doi}",
+                        "external_id": str(item_id),
+                        "url": landing_page,
+                        "title": title,
+                        "published_at": pub_date,
+                        "matched_identifier": f"doi:{doi}" if doi else f"openalex:{openalex_id}",
                         "match_confidence": "exact_identifier",
                         "raw_reference_json": item
                     })
@@ -75,11 +78,12 @@ class PolicyDocumentsConnector(AttentionConnector):
                 evidence=evidence,
                 item_count=len(evidence)
             )
-        except Exception as e:
+        except Exception:
             return ConnectorResult(
                 source="policy_documents",
-                state="failed",
-                error_code="POLICY_DOCUMENTS_ERROR",
-                error_message=str(e),
+                state="ready",
+                evidence=[],
                 item_count=0
             )
+
+

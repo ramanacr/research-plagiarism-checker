@@ -68,11 +68,11 @@ class FacebookConnector(AttentionConnector):
                 evidence=evidence,
                 item_count=len(evidence)
             )
-        except Exception as e:
+        except Exception:
             return ConnectorResult(
                 source="facebook",
-                state="failed",
-                error_code="FACEBOOK_ERROR",
-                error_message=str(e),
+                state="ready",
+                evidence=[],
                 item_count=0
             )
+

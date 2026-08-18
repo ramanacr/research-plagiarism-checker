@@ -126,16 +126,16 @@ def test_policy_documents_connector(mock_get, mock_work):
     mock_resp = MagicMock()
     mock_resp.status_code = 200
     mock_resp.json.return_value = {
-        "message": {
-            "events": [
-                {
-                    "id": "pol_1",
-                    "subj_id": "https://who.int/policy/report.pdf",
-                    "title": "WHO Clinical Guideline",
-                    "occurred_at": "2026-07-01T10:00:00Z"
+        "results": [
+            {
+                "id": "pol_1",
+                "title": "WHO Clinical Guideline",
+                "publication_date": "2026-07-01",
+                "primary_location": {
+                    "landing_page_url": "https://who.int/policy/report.pdf"
                 }
-            ]
-        }
+            }
+        ]
     }
     mock_get.return_value = mock_resp
 

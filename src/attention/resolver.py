@@ -76,28 +76,28 @@ class WorkResolver:
             raise HTTPException(status_code=404, detail="Publication could not be resolved from any life sciences provider.")
 
         # Cross-enrich missing identifiers (e.g. if PubMed omitted DOI, query Europe PMC & OpenAlex)
-        if norm_pmid:
-            if not resolved_metadata.doi or not resolved_metadata.pmcid:
-                try:
-                    epmc_meta = self.providers[1].resolve_pmid(norm_pmid)
-                    if epmc_meta:
-                        if not resolved_metadata.doi and epmc_meta.doi:
-                            resolved_metadata.doi = epmc_meta.doi
-                        if not resolved_metadata.pmcid and epmc_meta.pmcid:
-                            resolved_metadata.pmcid = epmc_meta.pmcid
-                except Exception:
-                    pass
+        if norm_pmid and not resolved_metadata.doi:
+            try:
+                epmc_meta = self.providers[1].resolve_pmid(norm_pmid)
+                if epmc_meta:
+                    if epmc_meta.doi:
+                        resolved_metadata.doi = epmc_meta.doi
+                    if epmc_meta.pmcid and not resolved_metadata.pmcid:
+                        resolved_metadata.pmcid = epmc_meta.pmcid
+            except Exception:
+                pass
 
-            if not resolved_metadata.openalex_id or not resolved_metadata.doi:
+            if not resolved_metadata.doi:
                 try:
                     oa_meta = self.providers[3].resolve_pmid(norm_pmid)
                     if oa_meta:
-                        if not resolved_metadata.openalex_id and oa_meta.openalex_id:
-                            resolved_metadata.openalex_id = oa_meta.openalex_id
-                        if not resolved_metadata.doi and oa_meta.doi:
+                        if oa_meta.doi:
                             resolved_metadata.doi = oa_meta.doi
+                        if oa_meta.openalex_id and not resolved_metadata.openalex_id:
+                            resolved_metadata.openalex_id = oa_meta.openalex_id
                 except Exception:
                     pass
+
 
         # Re-verify and resolve identifiers returned by the provider
         resolved_ids = {}

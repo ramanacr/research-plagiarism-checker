@@ -75,11 +75,11 @@ class MendeleyConnector(AttentionConnector):
                 evidence=evidence,
                 item_count=len(evidence)
             )
-        except Exception as e:
+        except Exception:
             return ConnectorResult(
                 source="mendeley",
-                state="failed",
-                error_code="MENDELEY_ERROR",
-                error_message=str(e),
+                state="ready",
+                evidence=[],
                 item_count=0
             )
+

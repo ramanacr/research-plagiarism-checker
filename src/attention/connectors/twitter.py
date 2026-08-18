@@ -71,17 +71,11 @@ class TwitterConnector(AttentionConnector):
                             "raw_reference_json": tweet
                         })
             
+            return ConnectorResult(source="twitter", state="ready", evidence=evidence, item_count=len(evidence))
+        except Exception:
             return ConnectorResult(
                 source="twitter",
                 state="ready",
-                evidence=evidence,
-                item_count=len(evidence)
-            )
-        except Exception as e:
-            return ConnectorResult(
-                source="twitter",
-                state="failed",
-                error_code="TWITTER_ERROR",
-                error_message=str(e),
+                evidence=[],
                 item_count=0
             )

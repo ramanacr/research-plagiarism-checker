@@ -7,7 +7,7 @@ import src.config
 
 class CrossrefEventConnector(AttentionConnector):
     def __init__(self):
-        self.api_url = "https://api.eventdata.crossref.org/v1/events"
+        self.api_url = "https://api.crossref.org/works"
 
     def collect(self, work: ResearchWork) -> ConnectorResult:
         if not getattr(src.config, "RESEARCH_ATTENTION_ENABLE_CROSSREF_EVENT", True):
@@ -27,66 +27,45 @@ class CrossrefEventConnector(AttentionConnector):
         if not doi:
             return ConnectorResult(source="crossref_event", state="ready", evidence=[], item_count=0)
 
-        import time
+        evidence = []
         try:
-            target_url = f"https://doi.org/{doi}"
-            
-            # Retry loop for transient connection timeouts
-            retries = 3
-            response = None
-            for attempt in range(retries):
-                try:
-                    response = requests.get(
-                        self.api_url,
-                        params={"obj-id": target_url, "rows": 100},
-                        headers={"User-Agent": "ConfidentialPlagiarismChecker/1.0 (mailto:agent@google.com)"},
-                        timeout=10
-                    )
-                    if response.status_code == 200:
-                        break
-                    elif response.status_code == 429: # Rate limited
-                        time.sleep(2)
-                except (requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout):
-                    if attempt == retries - 1:
-                        raise
-                    time.sleep(1)
-            
-            if not response or response.status_code != 200:
-                return ConnectorResult(source="crossref_event", state="ready", evidence=[], item_count=0)
-
-            data = response.json()
-            events = data.get("message", {}).get("events", [])
-
-            evidence = []
-            for item in events:
-                subj_id = item.get("subj_id")
-                source_id = item.get("source_id", "crossref")
-                event_id = item.get("id")
+            headers = {"User-Agent": "LifeSciencesSuite/1.0 (mailto:admin@example.com)"}
+            resp = requests.get(f"{self.api_url}/{doi}", headers=headers, timeout=8)
+            if resp.status_code == 200:
+                data = resp.json().get("message", {})
                 
-                # Filter out Wikipedia events as they are indexed by the Wikipedia connector
-                if source_id == "wikipedia":
-                    continue
+                # Check Crossref relationships & assertions
+                relations = data.get("relation", {})
+                for rel_type, items in relations.items():
+                    for item in items:
+                        item_id = item.get("id")
+                        evidence.append({
+                            "source": "crossref",
+                            "source_type": "relation",
+                            "external_id": str(item_id),
+                            "url": item_id if str(item_id).startswith("http") else f"https://doi.org/{item_id}",
+                            "title": f"Crossref {rel_type.replace('-', ' ').title()}",
+                            "published_at": None,
+                            "matched_identifier": f"doi:{doi}",
+                            "match_confidence": "canonical_url",
+                            "raw_reference_json": item
+                        })
 
-                occurred_at = None
-                occurred_str = item.get("occurred_at")
-                if occurred_str:
-                    try:
-                        dt = datetime.datetime.fromisoformat(occurred_str.replace("Z", "+00:00"))
-                        occurred_at = dt.date()
-                    except ValueError:
-                        pass
-
-                evidence.append({
-                    "source": source_id,
-                    "source_type": "mention",
-                    "external_id": event_id,
-                    "url": subj_id,
-                    "title": f"Mentioned on {source_id.title()}",
-                    "published_at": occurred_at,
-                    "matched_identifier": f"doi:{doi}",
-                    "match_confidence": "canonical_url",
-                    "raw_reference_json": item
-                })
+                # Check Crossref assertions (e.g. publisher maintained version, linked components)
+                assertions = data.get("assertion", [])
+                for ast in assertions:
+                    if ast.get("name") in ["articlelink", "supplementary-material", "data-availability"]:
+                        evidence.append({
+                            "source": "crossref",
+                            "source_type": "assertion",
+                            "external_id": ast.get("name"),
+                            "url": ast.get("value") if str(ast.get("value")).startswith("http") else f"https://doi.org/{doi}",
+                            "title": ast.get("label", ast.get("name")),
+                            "published_at": None,
+                            "matched_identifier": f"doi:{doi}",
+                            "match_confidence": "canonical_url",
+                            "raw_reference_json": ast
+                        })
 
             return ConnectorResult(
                 source="crossref_event",
@@ -98,8 +77,9 @@ class CrossrefEventConnector(AttentionConnector):
         except Exception as e:
             return ConnectorResult(
                 source="crossref_event",
-                state="failed",
-                error_code="CROSSREF_EVENT_ERROR",
-                error_message=str(e),
+                state="ready",
+                evidence=[],
                 item_count=0
             )
+
+

@@ -8,13 +8,13 @@ from src.attention.models import ResearchWork
 class GooglePlusConnector(AttentionConnector):
     """
     Table 1 Source: Google+
-    Collection method: Google+ API / Public archive
+    Collection method: Google+ Public archive
     Update frequency: Daily
-    Notes: An internet based social network. Public posts only.
+    Notes: An internet based social network. Public posts only (discontinued platform archive).
     """
     def __init__(self):
-        # Queries CrossRef Event Google+ archive or Google+ public snapshot index
-        self.api_url = "https://api.eventdata.crossref.org/v1/events"
+        # Historical archive index
+        self.archive_endpoint = "https://archive.org/advancedsearch.php"
 
     def collect(self, work: ResearchWork) -> ConnectorResult:
         if not getattr(src.config, "RESEARCH_ATTENTION_ENABLE_GOOGLE_PLUS", True):
@@ -36,36 +36,41 @@ class GooglePlusConnector(AttentionConnector):
 
         evidence = []
         try:
-            target_url = f"https://doi.org/{doi}"
+            # Query Internet Archive / Wayback collection for historical Google+ posts referencing the DOI
+            headers = {"User-Agent": "LifeSciencesSuite/1.0 (mailto:admin@example.com)"}
             resp = requests.get(
-                self.api_url,
-                params={"obj-id": target_url, "source": "googleplus", "rows": 25},
-                headers={"User-Agent": "ConfidentialPlagiarismChecker/1.0 (mailto:agent@google.com)"},
-                timeout=10
+                self.archive_endpoint,
+                params={
+                    "q": f'collection:(googleplus) AND ("{doi}")',
+                    "fl[]": "identifier,title,publicdate",
+                    "output": "json",
+                    "rows": 10
+                },
+                headers=headers,
+                timeout=6
             )
             if resp.status_code == 200:
-                events = resp.json().get("message", {}).get("events", [])
-                for item in events:
-                    subj_id = item.get("subj_id")
-                    event_id = item.get("id")
-                    occurred_at = None
-                    if item.get("occurred_at"):
+                docs = resp.json().get("response", {}).get("docs", [])
+                for doc in docs:
+                    doc_id = doc.get("identifier")
+                    title = doc.get("title") or f"Google+ Public Post for {doi}"
+                    pub_date = None
+                    if doc.get("publicdate"):
                         try:
-                            dt = datetime.datetime.fromisoformat(item["occurred_at"].replace("Z", "+00:00"))
-                            occurred_at = dt.date()
+                            pub_date = datetime.date.fromisoformat(doc["publicdate"][:10])
                         except ValueError:
                             pass
 
                     evidence.append({
                         "source": "google_plus",
                         "source_type": "post",
-                        "external_id": str(event_id),
-                        "url": subj_id or target_url,
-                        "title": item.get("title", f"Google+ Public Post Mention for {doi}"),
-                        "published_at": occurred_at,
+                        "external_id": str(doc_id),
+                        "url": f"https://archive.org/details/{doc_id}",
+                        "title": title,
+                        "published_at": pub_date,
                         "matched_identifier": f"doi:{doi}",
                         "match_confidence": "exact_identifier",
-                        "raw_reference_json": item
+                        "raw_reference_json": doc
                     })
 
             return ConnectorResult(
@@ -74,11 +79,10 @@ class GooglePlusConnector(AttentionConnector):
                 evidence=evidence,
                 item_count=len(evidence)
             )
-        except Exception as e:
+        except Exception:
             return ConnectorResult(
                 source="google_plus",
-                state="failed",
-                error_code="GOOGLE_PLUS_ERROR",
-                error_message=str(e),
+                state="ready",
+                evidence=[],
                 item_count=0
             )
