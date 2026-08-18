@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
-    container_name: research_db
+    container_name: research-attention-db
     restart: unless-stopped
     environment:
       POSTGRES_DB: research_attention
@@ -16,7 +14,8 @@ services:
 
   web:
     build: .
-    container_name: research_web
+    image: research-attention-api:latest
+    container_name: research-attention-api
     restart: unless-stopped
     environment:
       - RESEARCH_ATTENTION_DATABASE_URL=postgresql+psycopg://postgres:postgres@db:5432/research_attention
@@ -32,7 +31,8 @@ services:
 
   worker:
     build: .
-    container_name: research_worker
+    image: research-attention-worker:latest
+    container_name: research-attention-worker
     restart: unless-stopped
     environment:
       - RESEARCH_ATTENTION_DATABASE_URL=postgresql+psycopg://postgres:postgres@db:5432/research_attention
@@ -44,6 +44,6 @@ services:
       - db
     command: python -m src.attention.worker
 
-
 volumes:
   pgdata:
+
