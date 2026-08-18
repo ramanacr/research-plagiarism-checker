@@ -665,10 +665,11 @@
     <div class="search-container">
         <h2 class="search-title">Lookup Publication Attention Metrics</h2>
         <div class="search-box">
-            <input type="text" id="query-input" class="search-input" placeholder="Enter PMID (e.g. 33992) or DOI (e.g. 10.1000/xyz)..." value="33992">
+            <input type="text" id="query-input" class="search-input" placeholder="Enter PMID (e.g. 33992) or DOI (e.g. 10.1000/xyz)...">
             <button id="search-btn" class="search-btn">Analyze Work</button>
         </div>
     </div>
+
 
     <!-- Progress / Loading Status Card -->
     <div id="loader-card" class="status-message">
@@ -912,7 +913,11 @@
         };
 
         document.getElementById("search-btn").addEventListener("click", performSearch);
+        document.getElementById("query-input").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") performSearch();
+        });
         document.getElementById("force-refresh-btn").addEventListener("click", triggerRefresh);
+
 
         // Tab click listeners
         document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -1364,8 +1369,16 @@
         }
 
 
-        // Run default lookup on start
-        window.addEventListener("load", performSearch);
+        // Check for URL query params on start (e.g. ?q=33992 or ?pmid=33992)
+        window.addEventListener("load", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const query = urlParams.get("q") || urlParams.get("pmid") || urlParams.get("doi");
+            if (query) {
+                document.getElementById("query-input").value = query;
+                performSearch();
+            }
+        });
+
 
         // Theme management logic
         document.addEventListener('DOMContentLoaded', () => {
