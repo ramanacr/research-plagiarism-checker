@@ -141,6 +141,8 @@ def get_work_analytics(work_id: str, db: Session = Depends(get_db)):
         "evidence": details["attention"]["evidence"],
         "coverage": details["coverage"],
         "updated_at": datetime.datetime.utcnow().isoformat() + "Z",
+        "attention_score": details.get("attention_score"),
         "altmetric_score": details.get("altmetric_score")
     }
+
 

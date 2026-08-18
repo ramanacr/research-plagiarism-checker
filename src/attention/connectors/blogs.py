@@ -10,7 +10,7 @@ class BlogsConnector(AttentionConnector):
     Table 1 Source: Blogs
     Collection method: RSS feeds & Curated Academic Blog Directories
     Update frequency: Daily
-    Notes: Altmetric tracks a curated whitelist of over 2,000+ scientific and academic blogs 
+    Notes: Tracks a curated whitelist of scientific and academic blogs 
            via direct RSS feeds (e.g. PLOS Blogs, BioMed Central, ScienceBlogs, Nature Communities,
            The Node, Retraction Watch, Hypotheses.org) and scholarly commentary indices.
     """

@@ -1,13 +1,14 @@
 import pytest
-from src.attention.scoring import AltmetricScoreCalculator, SOURCE_WEIGHTS, DONUT_COLORS
+from src.attention.scoring import AttentionScoreCalculator, SOURCE_WEIGHTS, DONUT_COLORS
 
 def test_empty_evidence_scoring():
-    res = AltmetricScoreCalculator.calculate_score([])
+    res = AttentionScoreCalculator.calculate_score([])
     assert res["score"] == 0.0
     assert res["integer_score"] == 0
     assert res["donut"]["slices"] == []
     assert res["metrics"]["mendeley_readers"] == 0
     assert res["metrics"]["citation_counts"] == 0
+
 
 def test_source_weights_and_volume_author_deduplication():
     # Table 2: Volume rule: Only 1 mention from each person per source is counted.

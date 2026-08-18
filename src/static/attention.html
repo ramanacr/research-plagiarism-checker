@@ -680,18 +680,18 @@
     <!-- Dashboard Content Area (initially hidden) -->
     <div id="dashboard-grid" class="dashboard-grid">
         
-        <!-- 1. Altmetric Attention Score & Donut Hero Card -->
+        <!-- 1. Research Attention Score & Donut Hero Card -->
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    Altmetric Attention Score & Benchmark
+                    Research Attention Score & Benchmark
                 </h3>
                 <span class="stat-pill" id="percentile-badge">High Influence</span>
             </div>
             <div class="donut-hero-container">
                 <div class="donut-wrapper">
-                    <svg id="altmetric-donut-svg" width="220" height="220"></svg>
+                    <svg id="attention-donut-svg" width="220" height="220"></svg>
                     <div class="donut-center-badge">
                         <div class="donut-score-number" id="donut-score-display">0</div>
                         <div class="donut-score-label">Attention Score</div>
@@ -1039,8 +1039,8 @@
             document.getElementById("work-pmid").innerText = data.identifiers.pmid || "None";
             document.getElementById("work-pmcid").innerText = data.identifiers.pmcid || "None";
 
-            // Render Altmetric metrics
-            const scoreObj = data.altmetric_score || {};
+            // Render Attention Score metrics
+            const scoreObj = data.attention_score || data.altmetric_score || {};
             const intScore = scoreObj.integer_score || 0;
             document.getElementById("donut-score-display").innerText = intScore;
 
@@ -1052,7 +1052,7 @@
             document.getElementById("stat-contributors").innerText = metrics.total_unique_contributors || 0;
 
             // Render Donut Wheel
-            renderAltmetricDonut(scoreObj.donut || { total_score: intScore, slices: [] });
+            renderAttentionDonut(scoreObj.donut || { total_score: intScore, slices: [] });
 
             // Render connector coverage table
             const tbody = document.getElementById("connector-table-body");
@@ -1150,14 +1150,15 @@
             });
         }
 
-        // Render Multi-Color Altmetric Donut with Cursor Tooltip
-        function renderAltmetricDonut(donutData) {
-            d3.select("#altmetric-donut-svg").selectAll("*").remove();
+        // Render Multi-Color Research Attention Donut with Cursor Tooltip
+        function renderAttentionDonut(donutData) {
+            d3.select("#attention-donut-svg").selectAll("*").remove();
             const legendContainer = document.getElementById("donut-legend-list");
             legendContainer.innerHTML = "";
             const tooltip = d3.select("#global-chart-tooltip");
 
-            const svg = d3.select("#altmetric-donut-svg");
+            const svg = d3.select("#attention-donut-svg");
+
             const width = 220;
             const height = 220;
             const radius = Math.min(width, height) / 2 - 10;

@@ -2,7 +2,7 @@ import math
 from typing import List, Dict, Any, Optional
 from collections import defaultdict
 
-# Standard Altmetric source base weight table (Table 1 & Table 2)
+# Research Attention score base weight table
 SOURCE_WEIGHTS: Dict[str, float] = {
     "news": 8.0,
     "blogs": 5.0,
@@ -22,7 +22,7 @@ SOURCE_WEIGHTS: Dict[str, float] = {
     "youtube": 0.25,
     "pinterest": 0.25,
     "linkedin": 0.25,
-    # Readership and citation counts are tracked separately in Altmetric details
+    # Readership and citation counts are tracked separately in attention metrics
     "mendeley": 0.0,
     "scopus": 0.0,
     "web_of_science": 0.0,
@@ -30,7 +30,7 @@ SOURCE_WEIGHTS: Dict[str, float] = {
     "crossref_event": 1.0,
 }
 
-# Standard Altmetric Donut Colors (Figure 1)
+# Distinct Attention Channel Colors for Visualization Wheel
 DONUT_COLORS: Dict[str, str] = {
     "policy_documents": "#762a83",  # Purple
     "policy": "#762a83",
@@ -85,7 +85,7 @@ def check_self_citation(work_authors: List[str], citing_authors: List[str]) -> b
 def extract_author_identifier(evidence_item: Dict[str, Any]) -> str:
     """
     Extracts or derives a unique author / poster identifier for Volume deduplication.
-    Altmetric Volume rule: Only 1 mention from each person per source is counted.
+    Volume rule: Only 1 mention from each person per source is counted.
     """
     raw = evidence_item.get("raw_reference_json") or {}
     
@@ -117,22 +117,23 @@ def extract_author_identifier(evidence_item: Dict[str, Any]) -> str:
     url = evidence_item.get("url", "")
     return url.strip().lower()
 
-class AltmetricScoreCalculator:
+class AttentionScoreCalculator:
     """
-    Implements the Altmetric Attention Score algorithm, author volume deduplication,
-    and self-citation vs independent citation isolation (Table 2 & Figure 1).
+    Calculates the Research Attention Score, author volume deduplication,
+    and self-citation vs independent citation isolation.
     """
 
     @classmethod
     def calculate_score(cls, evidence_list: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
-        Calculates the Altmetric Attention Score from active evidence items.
+        Calculates the Research Attention Score from active evidence items.
         Applies:
-        - Source-level weighting (Table 2: Sources)
-        - Unique author per source volume deduplication (Table 2: Volume)
-        - Donut color representation mapping (Figure 1)
+        - Source-level weighting
+        - Unique author per source volume deduplication
+        - Visual wheel representation mapping
         - Separation of independent citations and author self-citations
         """
+
         # Deduplicate mentions per author per source
         source_authors: Dict[str, set] = defaultdict(set)
         source_effective_mentions: Dict[str, int] = defaultdict(int)
@@ -173,7 +174,7 @@ class AltmetricScoreCalculator:
 
             author_id = extract_author_identifier(item)
             
-            # Altmetric Volume rule: 1 mention per author per source counted
+            # Volume rule: 1 mention per author per source counted
             if author_id not in source_authors[source]:
                 source_authors[source].add(author_id)
                 source_effective_mentions[source] += 1
@@ -181,7 +182,7 @@ class AltmetricScoreCalculator:
                 source_subscores[source] += weight
 
         raw_score = sum(source_subscores.values())
-        # Altmetric rounds up to nearest whole integer when > 0, standard display
+        # Rounds up to nearest whole integer when > 0
         integer_score = math.ceil(raw_score) if raw_score > 0 else 0
 
         # Formulate donut breakdown
@@ -215,4 +216,9 @@ class AltmetricScoreCalculator:
                 "total_unique_contributors": sum(len(authors) for authors in source_authors.values())
             }
         }
+
+
+# Backward-compatibility alias
+AltmetricScoreCalculator = AttentionScoreCalculator
+
 

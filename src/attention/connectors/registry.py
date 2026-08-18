@@ -18,7 +18,7 @@ class ConnectorRegistry:
         from src.attention.connectors.pubpeer import PubPeerConnector
         self._connectors["pubpeer"] = PubPeerConnector
 
-        # Table 1: Altmetric Data Collection Sources
+        # Multi-Channel Attention Data Collection Sources
         from src.attention.connectors.twitter import TwitterConnector
         self._connectors["twitter"] = TwitterConnector
 

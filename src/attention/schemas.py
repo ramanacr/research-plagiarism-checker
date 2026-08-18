@@ -62,11 +62,11 @@ class DonutSlice(BaseModel):
     subscore: float
     percentage: float
 
-class AltmetricDonutDetails(BaseModel):
+class AttentionDonutDetails(BaseModel):
     total_score: int
     slices: List[DonutSlice] = Field(default_factory=list)
 
-class AltmetricScoreMetrics(BaseModel):
+class AttentionScoreMetrics(BaseModel):
     mendeley_readers: int = 0
     citation_counts: int = 0
     independent_citations: int = 0
@@ -74,11 +74,16 @@ class AltmetricScoreMetrics(BaseModel):
     total_unique_contributors: int = 0
 
 
-class AltmetricScoreDetails(BaseModel):
+class AttentionScoreDetails(BaseModel):
     score: float
     integer_score: int
-    donut: AltmetricDonutDetails
-    metrics: AltmetricScoreMetrics
+    donut: AttentionDonutDetails
+    metrics: AttentionScoreMetrics
+
+# Aliases
+AltmetricDonutDetails = AttentionDonutDetails
+AltmetricScoreMetrics = AttentionScoreMetrics
+AltmetricScoreDetails = AttentionScoreDetails
 
 class WorkDetailsResponse(BaseModel):
     work_id: str
@@ -87,7 +92,8 @@ class WorkDetailsResponse(BaseModel):
     identifiers: WorkIdentifiers
     attention: AttentionDetails
     coverage: CoverageDetails
-    altmetric_score: Optional[AltmetricScoreDetails] = None
+    attention_score: Optional[AttentionScoreDetails] = None
+    altmetric_score: Optional[AttentionScoreDetails] = None
 
 # Analytics schema
 class SourceBreakdownItem(BaseModel):
@@ -105,5 +111,7 @@ class WorkAnalyticsResponse(BaseModel):
     evidence: List[AttentionEvidenceItem] = Field(default_factory=list)
     coverage: CoverageDetails
     updated_at: str
-    altmetric_score: Optional[AltmetricScoreDetails] = None
+    attention_score: Optional[AttentionScoreDetails] = None
+    altmetric_score: Optional[AttentionScoreDetails] = None
+
 
