@@ -9,6 +9,10 @@ SOURCE_WEIGHTS: Dict[str, float] = {
     "policy_documents": 3.0,
     "policy": 3.0,
     "wikipedia": 3.0,
+    "openalex": 1.0,
+    "scopus": 1.0,
+    "web_of_science": 1.0,
+    "crossref_event": 1.0,
     "pubpeer": 1.0,
     "publons": 1.0,
     "f1000": 1.0,
@@ -22,13 +26,10 @@ SOURCE_WEIGHTS: Dict[str, float] = {
     "youtube": 0.25,
     "pinterest": 0.25,
     "linkedin": 0.25,
-    # Readership and citation counts are tracked separately in attention metrics
+    # Readership counts are tracked separately in readership metrics
     "mendeley": 0.0,
-    "scopus": 0.0,
-    "web_of_science": 0.0,
-    "openalex": 0.0,
-    "crossref_event": 1.0,
 }
+
 
 # Distinct Attention Channel Colors for Visualization Wheel
 DONUT_COLORS: Dict[str, str] = {
@@ -170,7 +171,15 @@ class AttentionScoreCalculator:
                     self_citations += int(count)
                 else:
                     independent_citations += int(count)
+                    # Independent scholarly citations feed into the research attention score
+                    author_id = extract_author_identifier(item)
+                    if author_id not in source_authors[source]:
+                        source_authors[source].add(author_id)
+                        source_effective_mentions[source] += 1
+                        weight = SOURCE_WEIGHTS.get(source, 1.0)
+                        source_subscores[source] += weight
                 continue
+
 
             author_id = extract_author_identifier(item)
             

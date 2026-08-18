@@ -114,13 +114,14 @@ def test_source_weights_and_volume_author_deduplication():
         }
     ]
 
-    res = AltmetricScoreCalculator.calculate_score(evidence)
-    # Total score = 2 * 1.0 (Twitter) + 8.0 (News) + 3.0 (Policy) + 5.0 (Blogs) + 0.25 (Facebook) + 0.25 (Reddit)
-    # = 2.0 + 8.0 + 3.0 + 5.0 + 0.25 + 0.25 = 18.5
-    assert res["score"] == 18.5
-    assert res["integer_score"] == 19  # rounded up
+    res = AttentionScoreCalculator.calculate_score(evidence)
+    # Total score = 2 * 1.0 (Twitter) + 8.0 (News) + 3.0 (Policy) + 5.0 (Blogs) + 0.25 (Facebook) + 0.25 (Reddit) + 1.0 (Scopus citation index)
+    # = 2.0 + 8.0 + 3.0 + 5.0 + 0.25 + 0.25 + 1.0 = 19.5
+    assert res["score"] == 19.5
+    assert res["integer_score"] == 20  # rounded up
     assert res["metrics"]["mendeley_readers"] == 42
     assert res["metrics"]["citation_counts"] == 15
+    assert res["metrics"]["independent_citations"] == 15
 
     # Check donut breakdown
     slices = res["donut"]["slices"]
@@ -130,7 +131,9 @@ def test_source_weights_and_volume_author_deduplication():
     assert sources_in_donut["news"]["subscore"] == 8.0
     assert sources_in_donut["twitter"]["unique_authors"] == 2
     assert sources_in_donut["twitter"]["subscore"] == 2.0
+    assert "scopus" in sources_in_donut
     assert "mendeley" not in sources_in_donut  # 0.0 weight sources omitted from score donut
+
 
 def test_inactive_evidence_is_ignored():
     evidence = [
@@ -144,6 +147,7 @@ def test_inactive_evidence_is_ignored():
             "active": False  # Inactive
         }
     ]
-    res = AltmetricScoreCalculator.calculate_score(evidence)
+    res = AttentionScoreCalculator.calculate_score(evidence)
     assert res["score"] == 0.0
     assert res["integer_score"] == 0
+
