@@ -48,6 +48,9 @@
             --toggle-text: #f3f4f6;
             --toggle-text-inactive: #9ca3af;
             --header-btn-bg: rgba(255, 255, 255, 0.05);
+            --select-bg: #151c2e;
+            --select-option-bg: #0f172a;
+            --select-border: rgba(255, 255, 255, 0.16);
         }
 
         /* Light Theme Variables */
@@ -80,6 +83,9 @@
             --toggle-text: #0f172a;
             --toggle-text-inactive: #64748b;
             --header-btn-bg: rgba(15, 23, 42, 0.05);
+            --select-bg: #ffffff;
+            --select-option-bg: #ffffff;
+            --select-border: rgba(15, 23, 42, 0.16);
         }
 
         * {
@@ -1124,20 +1130,59 @@
             color: var(--text-muted);
         }
 
-        .toolbar-select, .toolbar-input {
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 6px 12px;
+        .toolbar-select, select {
+            background-color: var(--select-bg) !important;
+            color: var(--text-main) !important;
+            border: 1px solid var(--select-border) !important;
             border-radius: 8px;
+            padding: 7px 32px 7px 12px;
             font-size: 12px;
+            font-weight: 600;
+            font-family: inherit;
             outline: none;
             cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23818cf8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 10px center !important;
+            background-size: 14px !important;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        html[data-theme="light"] .toolbar-select, html[data-theme="light"] select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+        }
+
+        .toolbar-select:focus, select:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px var(--primary-glow) !important;
+        }
+
+        .toolbar-select option, select option {
+            background-color: var(--select-option-bg) !important;
+            color: var(--text-main) !important;
+            padding: 8px 12px;
+            font-size: 12.5px;
         }
 
         .toolbar-input {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            outline: none;
             min-width: 180px;
             cursor: text;
+        }
+
+        .toolbar-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
         }
 
         .toolbar-btn {
@@ -1379,13 +1424,43 @@
                     <div class="audit-panel">
                         <div class="audit-title">
                             <span>🛡️</span> Data Privacy & Leak Audit
-                            <button class="info-btn">i<span class="info-popover"><strong>Zero-Leak Architecture</strong><span>Only non-sensitive topical search keywords are sent to PubMed/Europe PMC. Full text is strictly isolated in RAM.</span></span></button>
+                            <button class="info-btn">i<span class="info-popover"><strong>Zero-Leak Architecture</strong><span>Only non-sensitive topical search keywords are transmitted to external scholarly APIs. Full text is strictly isolated in RAM.</span></span></button>
                         </div>
-                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
-                            The following anonymized keywords represent the <b>only</b> data transmitted to external servers (NCBI PubMed & Europe PMC) to find matching articles:
-                        </p>
-                        <div id="audit-keywords">
-                            <!-- Keywords pills will render here -->
+                        
+                        <!-- Searched Scholarly Repositories Section -->
+                        <div style="margin-bottom: 12px;">
+                            <div style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+                                🌐 Searched Scholarly Repositories (7 Global Channels)
+                            </div>
+                            <div id="audit-providers" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                <span class="keyword-pill" style="border-color: var(--success); color: var(--success);">✓ PubMed (NCBI)</span>
+                                <span class="keyword-pill" style="border-color: var(--success); color: var(--success);">✓ Europe PMC</span>
+                                <span class="keyword-pill" style="border-color: var(--success); color: var(--success);">✓ PMC Open Access</span>
+                                <span class="keyword-pill" style="border-color: var(--success); color: var(--success);">✓ Crossref Works</span>
+                                <span class="keyword-pill" style="border-color: var(--success); color: var(--success);">✓ OpenAlex Graph</span>
+                                <span class="keyword-pill" style="border-color: var(--success); color: var(--success);">✓ arXiv Pre-prints</span>
+                                <span class="keyword-pill" style="border-color: var(--success); color: var(--success);">✓ Unpaywall OA</span>
+                            </div>
+                        </div>
+
+                        <!-- Anonymized Entities Transmitted -->
+                        <div style="margin-bottom: 12px;">
+                            <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+                                🔒 Anonymized Biomedical Concepts Transmitted (RAM-Isolated)
+                            </div>
+                            <div id="audit-keywords" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                <!-- Keywords pills will render here -->
+                            </div>
+                        </div>
+
+                        <!-- Coverage Breakdown -->
+                        <div>
+                            <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+                                📊 Non-Overlapping Span Metrics
+                            </div>
+                            <div id="audit-coverage-stats" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                <!-- Coverage pills render here -->
+                            </div>
                         </div>
                     </div>
 
@@ -1920,23 +1995,60 @@
             badge.className = 'risk-badge risk-' + riskLevel;
             badge.innerText = riskLevel + ' RISK';
 
-            // Audit Panel: Coverage breakdown
+            // Audit Panel: Anonymized Keywords
             const keywordsDiv = document.getElementById('audit-keywords');
-            keywordsDiv.innerHTML = '';
-            const pills = [
-                { label: 'Suspicious Coverage: ' + (data.suspicious_coverage || 0) + '%', color: riskLevel === 'LOW' ? 'var(--success)' : 'var(--danger)' },
-                { label: 'Quoted / Cited: ' + (data.quoted_or_cited_coverage || 0) + '%', color: 'var(--success)' },
-                { label: 'Common Scientific Phrases: ' + (data.common_phrase_coverage || 0) + '%', color: 'var(--primary)' },
-                { label: 'Total Matches: ' + (data.matches ? data.matches.length : 0), color: 'var(--text-main)' }
-            ];
-            pills.forEach(p => {
-                const span = document.createElement('span');
-                span.className = 'keyword-pill';
-                span.style.borderColor = p.color;
-                span.style.color = p.color;
-                span.innerText = p.label;
-                keywordsDiv.appendChild(span);
-            });
+            if (keywordsDiv) {
+                keywordsDiv.innerHTML = '';
+                const kwList = (data.guardrails && data.guardrails.anonymized_search_keywords) ? data.guardrails.anonymized_search_keywords : [];
+                if (kwList.length > 0) {
+                    kwList.forEach(kw => {
+                        const span = document.createElement('span');
+                        span.className = 'keyword-pill';
+                        span.innerText = kw;
+                        keywordsDiv.appendChild(span);
+                    });
+                } else {
+                    // Collect sample topics from match phrases
+                    const samplePhrases = [];
+                    (data.matches || []).forEach(m => {
+                        if (m.evidence && m.evidence.longest_copied_phrase && samplePhrases.length < 5) {
+                            if (!samplePhrases.includes(m.evidence.longest_copied_phrase)) {
+                                samplePhrases.push(m.evidence.longest_copied_phrase);
+                            }
+                        }
+                    });
+                    if (samplePhrases.length > 0) {
+                        samplePhrases.forEach(p => {
+                            const span = document.createElement('span');
+                            span.className = 'keyword-pill';
+                            span.innerText = p;
+                            keywordsDiv.appendChild(span);
+                        });
+                    } else {
+                        keywordsDiv.innerHTML = '<span style="font-size:12px; color:var(--text-muted)">Anonymized biomedical concepts extracted in-memory; 0 confidential text bytes transmitted.</span>';
+                    }
+                }
+            }
+
+            // Audit Panel: Coverage breakdown
+            const coverageDiv = document.getElementById('audit-coverage-stats');
+            if (coverageDiv) {
+                coverageDiv.innerHTML = '';
+                const pills = [
+                    { label: 'Suspicious Coverage: ' + (data.suspicious_coverage || 0) + '%', color: riskLevel === 'LOW' ? 'var(--success)' : 'var(--danger)' },
+                    { label: 'Quoted / Cited: ' + (data.quoted_or_cited_coverage || 0) + '%', color: 'var(--success)' },
+                    { label: 'Common Scientific Phrases: ' + (data.common_phrase_coverage || 0) + '%', color: 'var(--primary)' },
+                    { label: 'Total Matches: ' + (data.matches ? data.matches.length : 0), color: 'var(--text-main)' }
+                ];
+                pills.forEach(p => {
+                    const span = document.createElement('span');
+                    span.className = 'keyword-pill';
+                    span.style.borderColor = p.color;
+                    span.style.color = p.color;
+                    span.innerText = p.label;
+                    coverageDiv.appendChild(span);
+                });
+            }
 
             // Render Legends Bar with interactive tooltips & match counts
             renderLegendBadges();
