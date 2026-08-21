@@ -13,6 +13,11 @@ from src.plagiarism.providers.base import (
 )
 from src.plagiarism.providers.pubmed import PubMedProvider
 from src.plagiarism.providers.europe_pmc import EuropePMCProvider
+from src.plagiarism.providers.pmc_oa import PMCOAProvider
+from src.plagiarism.providers.crossref import CrossrefProvider
+from src.plagiarism.providers.openalex import OpenAlexProvider
+from src.plagiarism.providers.arxiv import ArXivProvider
+from src.plagiarism.providers.unpaywall import UnpaywallProvider
 
 
 class ProviderRegistry:
@@ -168,4 +173,9 @@ def create_default_registry() -> ProviderRegistry:
     registry = ProviderRegistry()
     registry.register(PubMedProvider())
     registry.register(EuropePMCProvider())
+    registry.register(PMCOAProvider())
+    registry.register(CrossrefProvider())
+    registry.register(OpenAlexProvider())
+    registry.register(ArXivProvider())
+    registry.register(UnpaywallProvider())
     return registry
