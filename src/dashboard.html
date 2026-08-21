@@ -925,6 +925,11 @@
                 <p class="upload-subtitle">Drag and drop your PDF, DOCX or TXT file here. The document content is processed entirely in memory and never leaves this machine.</p>
                 <button class="btn" onclick="document.getElementById('file-input').click()">Select File</button>
                 <input type="file" id="file-input" accept=".pdf,.docx,.doc,.txt">
+                <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px; align-items: center;">
+                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Engine:</span>
+                    <button id="engine-v2-btn" type="button" class="btn" style="padding: 6px 14px; font-size: 12px; border-radius: 20px; background: var(--primary); color: #fff; font-weight: 600; border: none; cursor: pointer;" onclick="setEngineMode('v2')">⚡ Engine v2.0 (Multi-Channel & Rights)</button>
+                    <button id="engine-v1-btn" type="button" class="btn" style="padding: 6px 14px; font-size: 12px; border-radius: 20px; background: var(--toggle-bg); color: var(--text-muted); font-weight: 500; border: 1px solid var(--toggle-border); cursor: pointer;" onclick="setEngineMode('v1')">Engine v1.0 (Standard)</button>
+                </div>
             </div>
 
 
@@ -1146,6 +1151,25 @@
             }
         });
 
+        let currentEngine = 'v2';
+
+        function setEngineMode(mode) {
+            currentEngine = mode;
+            const v2Btn = document.getElementById('engine-v2-btn');
+            const v1Btn = document.getElementById('engine-v1-btn');
+            if (mode === 'v2') {
+                v2Btn.style.background = 'var(--primary)';
+                v2Btn.style.color = '#fff';
+                v1Btn.style.background = 'var(--toggle-bg)';
+                v1Btn.style.color = 'var(--text-muted)';
+            } else {
+                v1Btn.style.background = 'var(--primary)';
+                v1Btn.style.color = '#fff';
+                v2Btn.style.background = 'var(--toggle-bg)';
+                v2Btn.style.color = 'var(--text-muted)';
+            }
+        }
+
         function handleFile(file) {
             // Show loading panel, hide upload zone
             document.getElementById('drop-zone').style.display = 'none';
@@ -1157,19 +1181,23 @@
             const formData = new FormData();
             formData.append('file', file);
             
-            fetch('/api/analyze', {
+            const endpoint = currentEngine === 'v2' ? '/api/plagiarism/v2/check' : '/api/analyze';
+
+            fetch(endpoint, {
                 method: 'POST',
                 body: formData
             })
             .then(res => {
-                if (!res.ok) throw new Error('Analysis request failed');
+                if (!res.ok) throw new Error('Analysis request failed (Status ' + res.status + ')');
                 return res.json();
             })
             .then(data => {
-                if (data.status === 'success') {
+                if (data.check_id || data.engine_version === '2.0.0') {
+                    showResultsV2(data, file.name);
+                } else if (data.status === 'success') {
                     showResults(data);
                 } else {
-                    alert('Error: ' + data.error);
+                    alert('Error: ' + (data.error || data.detail || 'Analysis could not be completed.'));
                     resetAnalyzer();
                 }
             })
@@ -1177,6 +1205,178 @@
                 alert('Connection error or analysis failure: ' + err.message);
                 resetAnalyzer();
             });
+        }
+
+        function updateStepsProgress() {
+            const steps = [
+                { id: 'step-extract', delay: 100 },
+                { id: 'step-anonymize', delay: 800 },
+                { id: 'step-pubmed', delay: 1800 },
+                { id: 'step-similarity', delay: 2800 }
+            ];
+            
+            steps.forEach(step => {
+                setTimeout(() => {
+                    const el = document.getElementById(step.id);
+                    if (el) {
+                        el.classList.add('active');
+                        // Complete previous step
+                        if (step.id === 'step-anonymize') document.getElementById('step-extract').classList.add('completed');
+                        if (step.id === 'step-pubmed') document.getElementById('step-anonymize').classList.add('completed');
+                        if (step.id === 'step-similarity') document.getElementById('step-pubmed').classList.add('completed');
+                    }
+                }, step.delay);
+            });
+        }
+
+        function showResultsV2(data, fileName) {
+            loadingPanel.style.display = 'none';
+            uploadPanel.style.display = 'none';
+            resultsPanel.style.display = 'flex';
+            document.getElementById('header-reset-btn').style.display = 'block';
+
+            // File metadata
+            document.getElementById('info-filename').innerText = data.metadata ? (data.metadata.title || fileName) : fileName;
+            document.getElementById('info-words').innerText = data.metadata && data.metadata.word_count ? data.metadata.word_count.toLocaleString() : '-';
+            document.getElementById('info-sentences').innerText = data.metadata && data.metadata.passages_analyzed ? data.metadata.passages_analyzed + ' passages' : '-';
+            document.getElementById('info-time').innerText = 'Engine v' + (data.engine_version || '2.0.0');
+
+            // Risk Gauge
+            const overallPct = Math.round(data.overall_matched_coverage || 0);
+            document.getElementById('risk-pct-text').innerText = overallPct + '%';
+
+            const ring = document.getElementById('progress-ring');
+            const radius = ring.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (overallPct / 100) * circumference;
+
+            let riskColor = 'var(--success)';
+            let riskGlow = 'var(--success-glow)';
+            const riskLevel = data.risk_level || 'LOW';
+            if (riskLevel === 'HIGH' || riskLevel === 'CRITICAL') {
+                riskColor = 'var(--danger)';
+                riskGlow = 'var(--danger-glow)';
+            } else if (riskLevel === 'MODERATE') {
+                riskColor = 'var(--warning)';
+                riskGlow = 'var(--warning-glow)';
+            }
+
+            ring.style.stroke = riskColor;
+            ring.style.strokeDasharray = circumference;
+            ring.style.strokeDashoffset = offset;
+
+            const badge = document.getElementById('risk-status-badge');
+            badge.className = 'risk-badge risk-' + riskLevel;
+            badge.innerText = riskLevel + ' RISK';
+
+            // Audit Panel: Coverage breakdown
+            const keywordsDiv = document.getElementById('audit-keywords');
+            keywordsDiv.innerHTML = '';
+            const pills = [
+                { label: 'Suspicious Coverage: ' + (data.suspicious_coverage || 0) + '%', color: riskLevel === 'LOW' ? 'var(--success)' : 'var(--danger)' },
+                { label: 'Quoted / Cited: ' + (data.quoted_or_cited_coverage || 0) + '%', color: 'var(--success)' },
+                { label: 'Common Scientific Phrases: ' + (data.common_phrase_coverage || 0) + '%', color: 'var(--primary)' },
+                { label: 'Total Matches: ' + (data.matches ? data.matches.length : 0), color: 'var(--text-main)' }
+            ];
+            pills.forEach(p => {
+                const span = document.createElement('span');
+                span.className = 'keyword-pill';
+                span.style.borderColor = p.color;
+                span.style.color = p.color;
+                span.innerText = p.label;
+                keywordsDiv.appendChild(span);
+            });
+
+            const matches = data.matches || [];
+            const suspiciousMatches = matches.filter(m => ['EXACT_COPY', 'NEAR_EXACT_COPY', 'LIKELY_PARAPHRASE', 'POSSIBLE_PARAPHRASE'].includes(m.classification));
+            const nonSuspiciousMatches = matches.filter(m => !['EXACT_COPY', 'NEAR_EXACT_COPY', 'LIKELY_PARAPHRASE', 'POSSIBLE_PARAPHRASE'].includes(m.classification));
+
+            document.getElementById('count-semantic').innerText = suspiciousMatches.length;
+            document.getElementById('count-verbatim').innerText = nonSuspiciousMatches.length;
+
+            // Render Tab 1 (Suspicious Matches)
+            const semDiv = document.getElementById('semantic-matches-list');
+            semDiv.innerHTML = '';
+            if (suspiciousMatches.length === 0) {
+                semDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛡️</div>
+                        <h4>Zero Suspicious Plagiarism Detected</h4>
+                        <p>No uncited exact copies or heavy paraphrasing detected across PubMed, Europe PMC, PMC OA, Crossref, OpenAlex, arXiv, and Unpaywall.</p>
+                    </div>`;
+            } else {
+                semDiv.innerHTML = renderMatchCards(suspiciousMatches, 'Suspicious Matches (Requires Review)', true);
+            }
+
+            // Render Tab 2 (All Evidence & Common Phrases)
+            const verbDiv = document.getElementById('verbatim-matches-list');
+            verbDiv.innerHTML = '';
+            if (matches.length === 0) {
+                verbDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✓</div>
+                        <h4>No Overlapping Passages Found</h4>
+                        <p>Document exhibits clean original passage structure with no database matches.</p>
+                    </div>`;
+            } else {
+                verbDiv.innerHTML = renderMatchCards(matches, 'All Retrieved Evidence & Matches', false);
+            }
+        }
+
+        function renderMatchCards(matchesList, title, isSuspiciousOnly) {
+            let html = `<h4 style="margin: 24px 0 12px 0; color: ${isSuspiciousOnly ? 'var(--warning)' : 'var(--primary)'}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${title} (${matchesList.length})</h4>`;
+            matchesList.forEach(m => {
+                const cls = m.classification || 'UNKNOWN';
+                let badgeColor = 'var(--text-muted)';
+                let badgeBg = 'rgba(255,255,255,0.05)';
+                if (cls === 'EXACT_COPY') { badgeColor = 'var(--danger)'; badgeBg = 'var(--danger-glow)'; }
+                else if (cls === 'NEAR_EXACT_COPY' || cls === 'LIKELY_PARAPHRASE') { badgeColor = 'var(--warning)'; badgeBg = 'var(--warning-glow)'; }
+                else if (cls === 'PROPERLY_QUOTED' || cls === 'CITED_OVERLAP') { badgeColor = 'var(--success)'; badgeBg = 'var(--success-glow)'; }
+                else if (cls === 'COMMON_PHRASE') { badgeColor = 'var(--primary)'; badgeBg = 'var(--primary-glow)'; }
+
+                const prov = (m.source && m.source.provider) ? m.source.provider.toUpperCase() : 'SCHOLARLY SOURCE';
+                const authors = (m.source && m.source.authors && m.source.authors.length) ? m.source.authors.slice(0, 2).join(', ') : 'Unknown Authors';
+                const journal = (m.source && m.source.journal) ? m.source.journal : '';
+                const year = (m.source && m.source.year) ? '(' + m.source.year + ')' : '';
+                const doi = (m.source && m.source.doi) ? m.source.doi : null;
+                const pmid = (m.source && m.source.pmid) ? m.source.pmid : null;
+                const longestPhrase = (m.evidence && m.evidence.longest_copied_phrase) ? m.evidence.longest_copied_phrase : null;
+                const semScore = m.evidence && m.evidence.semantic_similarity ? Math.round(m.evidence.semantic_similarity * 100) + '%' : 'N/A';
+                const exactOverlap = m.evidence && m.evidence.exact_overlap ? Math.round(m.evidence.exact_overlap * 100) + '%' : '0%';
+
+                html += `
+                    <div class="match-card">
+                        <div class="match-header">
+                            <h4 class="match-title">[${prov}] ${m.source_document_id || 'Scholarly Publication'}</h4>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span class="match-score-badge" style="background: ${badgeBg}; color: ${badgeColor}; border-color: ${badgeColor}">
+                                    ${cls.replace(/_/g, ' ')}
+                                </span>
+                                <span class="match-score-badge" style="background: var(--primary-glow); color: var(--primary);">
+                                    ${semScore} Semantic
+                                </span>
+                            </div>
+                        </div>
+                        <div class="match-details">
+                            <span><b>Authors:</b> ${authors}</span>
+                            ${journal ? `<span><b>Journal:</b> ${journal} ${year}</span>` : ''}
+                            ${pmid ? `<span><b>PMID:</b> ${pmid}</span>` : ''}
+                            ${doi ? `<span><b>DOI:</b> <a href="https://doi.org/${doi}" target="_blank" style="color:var(--primary);text-decoration:none;">${doi}</a></span>` : ''}
+                        </div>
+                        ${longestPhrase ? `
+                            <div class="sentence-box" style="margin-top: 10px;">
+                                <div class="sentence-box-label">Longest Common Contiguous Phrase (${exactOverlap} exact token overlap)</div>
+                                <div class="sentence-text highlight-text">"${longestPhrase}"</div>
+                            </div>` : ''}
+                        <div style="display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+                            <span>Confidence: ${Math.round((m.confidence || 0) * 100)}%</span>
+                            <span>Exact Overlap: ${exactOverlap}</span>
+                            <span>Boilerplate Score: ${m.evidence ? m.evidence.boilerplate_score : 0}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            return html;
         }
 
         function updateStepsProgress() {
