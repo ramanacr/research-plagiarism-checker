@@ -1,3 +1,4 @@
+import time
 from typing import List, Dict, Any, Optional
 from src.extractor import DocumentExtractor
 from src.pubmed_client import PubMedClient
