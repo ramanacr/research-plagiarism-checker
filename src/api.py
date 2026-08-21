@@ -62,6 +62,53 @@ async def analyze_file(file: UploadFile = File(...)):
             detail=f"Error processing document: {str(e)}"
         )
 
+
+@app.post("/api/plagiarism/v2/check")
+async def analyze_file_v2(file: UploadFile = File(...)):
+    """
+    v2 Plagiarism & Similarity check with passage segmentation and calibrated multi-signal scoring.
+    """
+    allowed_extensions = {".pdf", ".docx", ".doc", ".txt"}
+    file_ext = os.path.splitext(file.filename)[1].lower()
+    
+    if file_ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file format. Supported formats: {', '.join(allowed_extensions)}"
+        )
+        
+    try:
+        content = await file.read()
+        report = agent.analyze_document_v2(content, file.filename)
+        return report.to_dict()
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error in v2 plagiarism check: {str(e)}"
+        )
+
+
+@app.get("/api/plagiarism/v2/status")
+async def get_engine_status():
+    """
+    Returns provider health status and runtime telemetry metrics.
+    """
+    from src.plagiarism.observability.metrics import global_metrics
+    health = await agent.plagiarism_service.provider_registry.check_all_health()
+    health_dict = {
+        name: {
+            "is_healthy": h.is_healthy,
+            "latency_ms": round(h.latency_ms, 2),
+            "error_message": h.error_message,
+        }
+        for name, h in health.items()
+    }
+    return {
+        "engine_version": "2.0.0",
+        "providers": health_dict,
+        "metrics": global_metrics.get_summary(),
+    }
+
 @app.get("/", response_class=HTMLResponse)
 def get_portal_hub():
     """Serves the portal landing Pre-page."""

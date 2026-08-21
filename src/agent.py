@@ -1,9 +1,11 @@
-import time
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from src.extractor import DocumentExtractor
 from src.pubmed_client import PubMedClient
 from src.europe_pmc_client import EuropePMCClient
 from src.similarity_engine import SimilarityEngine
+from src.plagiarism.services.plagiarism_service import PlagiarismService
+from src.plagiarism.scoring.models import PlagiarismReport
+
 
 class ResearchGuardrailAgent:
     def __init__(self):
@@ -11,6 +13,24 @@ class ResearchGuardrailAgent:
         self.pubmed_client = PubMedClient()
         self.europe_pmc = EuropePMCClient()
         self.similarity_engine = SimilarityEngine()
+        self._plagiarism_service: Optional[PlagiarismService] = None
+
+    @property
+    def plagiarism_service(self) -> PlagiarismService:
+        if self._plagiarism_service is None:
+            self._plagiarism_service = PlagiarismService()
+        return self._plagiarism_service
+
+    def analyze_document_v2(
+        self,
+        file_bytes: bytes,
+        filename: str,
+        options: Optional[Dict[str, Any]] = None,
+    ) -> PlagiarismReport:
+        """
+        Executes v2.0 multi-channel plagiarism check using passage segmentation and calibrated scoring.
+        """
+        return self.plagiarism_service.check_file_bytes(file_bytes, filename, options=options)
 
     def analyze_document(self, file_bytes: bytes, filename: str) -> Dict[str, Any]:
         """

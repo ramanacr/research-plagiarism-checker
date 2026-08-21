@@ -18,6 +18,11 @@ def main():
         action="store_true", 
         help="Print raw JSON results directly to stdout instead of formatted text"
     )
+    parser.add_argument(
+        "--v2",
+        action="store_true",
+        help="Use v2 multi-channel passage segmentation and calibrated evidence engine"
+    )
     
     args = parser.parse_args()
     
@@ -38,6 +43,20 @@ def main():
     # Initialize the local AI agent
     try:
         agent = ResearchGuardrailAgent()
+        if args.v2:
+            report_v2 = agent.analyze_document_v2(file_bytes, os.path.basename(args.file))
+            if args.json:
+                print(json.dumps(report_v2.to_dict(), indent=2))
+            else:
+                from src.plagiarism.reporting.builder import ReportBuilder
+                print(ReportBuilder.build_text_summary(report_v2))
+            
+            if args.output:
+                with open(args.output, "w", encoding="utf-8") as f:
+                    json.dump(report_v2.to_dict(), f, indent=2)
+                print(f"[*] Report saved successfully to '{args.output}'", file=sys.stderr)
+            return
+
         report = agent.analyze_document(file_bytes, os.path.basename(args.file))
     except Exception as e:
         print(f"Error running analysis: {e}", file=sys.stderr)

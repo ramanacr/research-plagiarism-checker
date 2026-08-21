@@ -21,6 +21,7 @@ class CandidateHit:
     semantic_score: float = 0.0
     exact_score: float = 0.0
     fusion_score: float = 0.0
+    cross_encoder_score: Optional[float] = None
     channels: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
@@ -33,6 +34,7 @@ class CandidateHit:
             "semantic_score": self.semantic_score,
             "exact_score": self.exact_score,
             "fusion_score": self.fusion_score,
+            "cross_encoder_score": self.cross_encoder_score,
             "channels": self.channels,
             "metadata": self.metadata,
         }
