@@ -22,9 +22,12 @@ services:
       - EMBEDDING_MODEL_NAME=all-mpnet-base-v2
       - SPACY_MODEL_NAME=en_core_web_trf
       - HF_HOME=/app/model_cache
+      - PLAGIARISM_STORAGE_DIR=/app/data/plagiarism
       - SCOPUS_API_KEY=${SCOPUS_API_KEY:-00e42429e6cffa7ef063df41c9940575}
     ports:
       - "8000:8000"
+    volumes:
+      - plagiarism_data:/app/data/plagiarism
     depends_on:
       - db
     command: uvicorn src.api:app --host 0.0.0.0 --port 8000
@@ -39,11 +42,15 @@ services:
       - EMBEDDING_MODEL_NAME=all-mpnet-base-v2
       - SPACY_MODEL_NAME=en_core_web_trf
       - HF_HOME=/app/model_cache
+      - PLAGIARISM_STORAGE_DIR=/app/data/plagiarism
       - SCOPUS_API_KEY=${SCOPUS_API_KEY:-00e42429e6cffa7ef063df41c9940575}
+    volumes:
+      - plagiarism_data:/app/data/plagiarism
     depends_on:
       - db
     command: python -m src.attention.worker
 
 volumes:
   pgdata:
+  plagiarism_data:
 
