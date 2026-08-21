@@ -258,29 +258,175 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 24px;
-            padding: 40px 0;
+            gap: 20px;
+            padding: 30px 0;
+            text-align: center;
         }
 
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid var(--spinner-border);
+        /* Enthusiastic Multi-Ring Radar & Animation */
+        .loading-hero {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+        }
+        .radar-ring {
+            position: absolute;
             border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s linear infinite;
+            border: 1.5px solid var(--primary);
+            opacity: 0.7;
+            animation: radarPulse 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+        }
+        .radar-ring:nth-child(1) { width: 80px; height: 80px; animation-delay: 0s; }
+        .radar-ring:nth-child(2) { width: 60px; height: 60px; animation-delay: 0.6s; border-color: var(--success); }
+        .radar-ring:nth-child(3) { width: 40px; height: 40px; animation-delay: 1.2s; border-color: var(--warning); }
+        @keyframes radarPulse {
+            0% { transform: scale(0.6); opacity: 0.8; }
+            50% { opacity: 0.4; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+        .loading-center-icon {
+            font-size: 28px;
+            z-index: 2;
+            animation: floatIcon 2s ease-in-out infinite;
+        }
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-3px) rotate(5deg); }
         }
 
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
+        /* Animated Progress Bar & Timer */
+        .live-progress-container {
+            max-width: 480px;
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .progress-bar-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 12%;
+            background: linear-gradient(90deg, var(--primary), var(--success), #a855f7);
+            background-size: 200% 100%;
+            border-radius: 10px;
+            transition: width 0.6s ease;
+            animation: gradientShimmer 2s linear infinite;
+        }
+        @keyframes gradientShimmer {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+        .progress-bar-labels {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Dynamic Live Sub-Step Micro-Ticker */
+        .substep-ticker {
+            background: var(--toggle-bg);
+            border: 1px solid var(--toggle-border);
+            padding: 8px 14px;
+            border-radius: 100px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-main);
+            max-width: 480px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .pulsing-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 8px var(--primary);
+            animation: blinkDot 1s infinite alternate;
+            flex-shrink: 0;
+        }
+        @keyframes blinkDot {
+            from { opacity: 0.3; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Scientific Trivia & Fun Facts Card */
+        .trivia-box {
+            max-width: 480px;
+            width: 100%;
+            background: rgba(99, 102, 241, 0.04);
+            border: 1px dashed var(--border-color);
+            border-radius: 14px;
+            padding: 14px 16px;
+            text-align: left;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            animation: fadeIn 0.5s ease-out;
+            margin-top: 4px;
+        }
+        .trivia-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .trivia-content {
+            flex: 1;
+        }
+        .trivia-content h5 {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .trivia-content p {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+        .trivia-next-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
         }
 
         .loading-steps {
-            max-width: 400px;
+            max-width: 480px;
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             text-align: left;
         }
 
@@ -289,12 +435,16 @@
             align-items: center;
             gap: 12px;
             color: var(--text-muted);
-            font-size: 14px;
+            font-size: 13px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
         }
 
         .step-item.active {
             color: var(--primary);
             font-weight: 600;
+            background: rgba(99, 102, 241, 0.05);
         }
 
         .step-item.completed {
@@ -935,14 +1085,52 @@
 
             <!-- Scanning Status Display -->
             <div class="loading-container" id="loading-panel">
-                <div class="spinner"></div>
-                <h3>Processing Document Confidentiality</h3>
-                <p style="color: var(--text-muted); font-size: 14px;">Executing local analysis sandboxed from internet</p>
+                <div class="loading-hero">
+                    <div class="radar-ring"></div>
+                    <div class="radar-ring"></div>
+                    <div class="radar-ring"></div>
+                    <div class="loading-center-icon" id="loading-center-icon">🧠</div>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">Auditing Manuscript Confidentiality</h3>
+                    <p style="color: var(--text-muted); font-size: 13px;">Executing high-throughput in-RAM similarity analysis & citation verification</p>
+                </div>
+
+                <!-- Animated Progress Bar & Timer -->
+                <div class="live-progress-container">
+                    <div class="progress-bar-labels">
+                        <span id="loading-progress-stage">Initializing Pipeline...</span>
+                        <span id="loading-timer-badge">⏱️ 00:00.0s</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div class="progress-bar-fill" id="loading-progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Live Sub-Step Micro-Ticker (Dynamic for Step 4) -->
+                <div class="substep-ticker" id="substep-ticker-box">
+                    <span class="pulsing-dot"></span>
+                    <span id="substep-ticker-text">Extracting document sections and computing sentence boundaries...</span>
+                </div>
+
                 <div class="loading-steps">
-                    <div class="step-item" id="step-extract"><span class="step-icon">1</span> Extracting document text locally</div>
-                    <div class="step-item" id="step-anonymize"><span class="step-icon">2</span> Sanitizing content and extracting metadata keywords</div>
-                    <div class="step-item" id="step-pubmed"><span class="step-icon">3</span> Searching Life-Sciences Databases (PubMed & Europe PMC)</div>
-                    <div class="step-item" id="step-similarity"><span class="step-icon">4</span> Running SentenceTransformers & shingling similarity engine</div>
+                    <div class="step-item" id="step-extract"><span class="step-icon">1</span> Extracting document structure & sentence passages</div>
+                    <div class="step-item" id="step-anonymize"><span class="step-icon">2</span> Sanitizing content & extracting anonymized medical keywords</div>
+                    <div class="step-item" id="step-pubmed"><span class="step-icon">3</span> Multi-source candidate search (PubMed, PMC OA, Crossref, OpenAlex)</div>
+                    <div class="step-item" id="step-similarity"><span class="step-icon">4</span> Running SentenceTransformers, MinHash LSH & RRF fusion</div>
+                </div>
+
+                <!-- Interactive Scientific Trivia & Fun Facts -->
+                <div class="trivia-box">
+                    <div class="trivia-icon">💡</div>
+                    <div class="trivia-content">
+                        <h5>
+                            <span>Research Privacy & Science Trivia</span>
+                            <button type="button" class="trivia-next-btn" onclick="nextTriviaFact()">Next Fact &rarr;</button>
+                        </h5>
+                        <p id="trivia-text">Zero bytes of your manuscript ever leave local RAM. Outbound candidate discovery queries contain only anonymized biomedical noun concepts.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1170,6 +1358,123 @@
             }
         }
 
+        // Dynamic Loading & Ticker Management
+        let loadingTimerInterval = null;
+        let tickerRotationInterval = null;
+        let iconRotationInterval = null;
+        let triviaRotationInterval = null;
+        let currentTriviaIndex = 0;
+        let loadingStartTime = 0;
+
+        const subStepMessages = [
+            "⚡ Generating 768-dim SBERT dense embedding vectors for manuscript passages...",
+            "🧬 Evaluating 128 MinHash permutations for sub-millisecond shingle containment...",
+            "🔍 Fusing candidate rankings with Reciprocal Rank Fusion (RRF)...",
+            "📚 Cross-referencing citation graphs & DOIs with PubMed & Crossref registries...",
+            "🛡️ Suppressing scientific methodology & ethics boilerplate phrases...",
+            "⚖️ Classifying evidence into 10 calibrated match categories & calculating non-overlapping span coverage..."
+        ];
+
+        const triviaFacts = [
+            { icon: "💡", title: "Zero-Leak Privacy", text: "Zero bytes of your manuscript ever leave local RAM. Outbound discovery queries contain only anonymized biomedical noun concepts." },
+            { icon: "⚡", title: "Dense Neural Vectors", text: "SentenceTransformers (all-mpnet-base-v2) maps sentences into a 768-dimensional semantic space, catching heavily rewritten paraphrases." },
+            { icon: "🧬", title: "Affine MinHashing", text: "128-permutation affine MinHash signatures allow sub-millisecond Jaccard estimation across tens of thousands of literature passages." },
+            { icon: "🎯", title: "No Double-Counting", text: "Non-overlapping query span coverage takes the geometric union of matches so multiple database hits on one paragraph never falsely inflate risk." },
+            { icon: "🛡️", title: "Boilerplate Suppression", text: "Standard research phrases (e.g., 'written informed consent was obtained') are automatically filtered to protect methods sections." },
+            { icon: "📖", title: "Smart Citation Logic", text: "Legitimate academic citations with author names, DOIs, or quotation marks are classified separately and never penalized." },
+            { icon: "🌐", title: "7 Scholarly Repositories", text: "Engine v2.0 cross-checks PubMed, Europe PMC, PMC Open Access, Crossref, OpenAlex, arXiv, and Unpaywall." }
+        ];
+
+        function startLoadingTicker() {
+            loadingStartTime = Date.now();
+            currentTriviaIndex = Math.floor(Math.random() * triviaFacts.length);
+            updateTriviaDisplay();
+
+            const timerEl = document.getElementById('loading-timer-badge');
+            const progressFill = document.getElementById('loading-progress-fill');
+            const stageText = document.getElementById('loading-progress-stage');
+            const tickerText = document.getElementById('substep-ticker-text');
+            const centerIcon = document.getElementById('loading-center-icon');
+
+            if (progressFill) progressFill.style.width = '10%';
+            if (stageText) stageText.innerText = 'Initializing Pipeline...';
+            if (tickerText) tickerText.innerText = 'Extracting document structure and computing sentence boundaries...';
+
+            // Timer interval
+            clearInterval(loadingTimerInterval);
+            loadingTimerInterval = setInterval(() => {
+                const elapsedMs = Date.now() - loadingStartTime;
+                const secs = (elapsedMs / 1000).toFixed(1);
+                if (timerEl) timerEl.innerText = `⏱️ 00:${secs.padStart(4, '0')}s`;
+            }, 100);
+
+            // Center icon rotation
+            const icons = ['🧠', '⚡', '🔬', '🛡️', '📚'];
+            let iconIdx = 0;
+            clearInterval(iconRotationInterval);
+            iconRotationInterval = setInterval(() => {
+                iconIdx = (iconIdx + 1) % icons.length;
+                if (centerIcon) centerIcon.innerText = icons[iconIdx];
+            }, 1400);
+
+            // Step 4 sub-step ticker rotation
+            let subIdx = 0;
+            clearInterval(tickerRotationInterval);
+            tickerRotationInterval = setInterval(() => {
+                const step4 = document.getElementById('step-similarity');
+                if (step4 && step4.classList.contains('active')) {
+                    subIdx = (subIdx + 1) % subStepMessages.length;
+                    if (tickerText) {
+                        tickerText.style.opacity = '0';
+                        setTimeout(() => {
+                            tickerText.innerText = subStepMessages[subIdx];
+                            tickerText.style.opacity = '1';
+                        }, 200);
+                    }
+                }
+            }, 2400);
+
+            // Trivia rotation
+            clearInterval(triviaRotationInterval);
+            triviaRotationInterval = setInterval(() => {
+                nextTriviaFact();
+            }, 5500);
+        }
+
+        function stopLoadingTicker() {
+            clearInterval(loadingTimerInterval);
+            clearInterval(tickerRotationInterval);
+            clearInterval(iconRotationInterval);
+            clearInterval(triviaRotationInterval);
+        }
+
+        function updateTriviaDisplay() {
+            const fact = triviaFacts[currentTriviaIndex];
+            const triviaBox = document.querySelector('.trivia-box');
+            if (triviaBox) {
+                const iconEl = triviaBox.querySelector('.trivia-icon');
+                const titleEl = triviaBox.querySelector('.trivia-content h5 span');
+                const textEl = document.getElementById('trivia-text');
+                if (iconEl) iconEl.innerText = fact.icon;
+                if (titleEl) titleEl.innerText = fact.title;
+                if (textEl) textEl.innerText = fact.text;
+            }
+        }
+
+        function nextTriviaFact() {
+            currentTriviaIndex = (currentTriviaIndex + 1) % triviaFacts.length;
+            const textEl = document.getElementById('trivia-text');
+            if (textEl) {
+                textEl.style.opacity = '0';
+                setTimeout(() => {
+                    updateTriviaDisplay();
+                    textEl.style.opacity = '1';
+                }, 150);
+            } else {
+                updateTriviaDisplay();
+            }
+        }
+
         function handleFile(file) {
             // Show loading panel, hide upload zone
             document.getElementById('drop-zone').style.display = 'none';
@@ -1192,6 +1497,7 @@
                 return res.json();
             })
             .then(data => {
+                stopLoadingTicker();
                 if (data.check_id || data.engine_version === '2.0.0') {
                     showResultsV2(data, file.name);
                 } else if (data.status === 'success') {
@@ -1202,22 +1508,33 @@
                 }
             })
             .catch(err => {
+                stopLoadingTicker();
                 alert('Connection error or analysis failure: ' + err.message);
                 resetAnalyzer();
             });
         }
 
         function updateStepsProgress() {
+            startLoadingTicker();
+
             const steps = [
-                { id: 'step-extract', delay: 100 },
-                { id: 'step-anonymize', delay: 800 },
-                { id: 'step-pubmed', delay: 1800 },
-                { id: 'step-similarity', delay: 2800 }
+                { id: 'step-extract', delay: 100, pct: 25, stage: "Extracting structure & sentence passages...", ticker: "Parsing document structure and computing sentence boundaries..." },
+                { id: 'step-anonymize', delay: 800, pct: 45, stage: "Extracting biomedical keywords...", ticker: "Sanitizing content and identifying medical noun entities..." },
+                { id: 'step-pubmed', delay: 1800, pct: 68, stage: "Querying scholarly discovery channels...", ticker: "Searching PubMed, PMC OA, Crossref, OpenAlex, and arXiv..." },
+                { id: 'step-similarity', delay: 2800, pct: 90, stage: "Neural embeddings & MinHash fusion...", ticker: "⚡ Generating 768-dim SBERT dense embedding vectors for manuscript passages..." }
             ];
             
             steps.forEach(step => {
                 setTimeout(() => {
                     const el = document.getElementById(step.id);
+                    const progressFill = document.getElementById('loading-progress-fill');
+                    const stageText = document.getElementById('loading-progress-stage');
+                    const tickerText = document.getElementById('substep-ticker-text');
+
+                    if (progressFill) progressFill.style.width = step.pct + '%';
+                    if (stageText) stageText.innerText = step.stage;
+                    if (tickerText) tickerText.innerText = step.ticker;
+
                     if (el) {
                         el.classList.add('active');
                         // Complete previous step
@@ -1230,6 +1547,7 @@
         }
 
         function showResultsV2(data, fileName) {
+            stopLoadingTicker();
             loadingPanel.style.display = 'none';
             uploadPanel.style.display = 'none';
             resultsPanel.style.display = 'flex';
@@ -1379,29 +1697,8 @@
             return html;
         }
 
-        function updateStepsProgress() {
-            const steps = [
-                { id: 'step-extract', delay: 100 },
-                { id: 'step-anonymize', delay: 800 },
-                { id: 'step-pubmed', delay: 1800 },
-                { id: 'step-similarity', delay: 2800 }
-            ];
-            
-            steps.forEach(step => {
-                setTimeout(() => {
-                    const el = document.getElementById(step.id);
-                    if (el) {
-                        el.classList.add('active');
-                        // Complete previous step
-                        if (step.id === 'step-anonymize') document.getElementById('step-extract').classList.add('completed');
-                        if (step.id === 'step-pubmed') document.getElementById('step-anonymize').classList.add('completed');
-                        if (step.id === 'step-similarity') document.getElementById('step-pubmed').classList.add('completed');
-                    }
-                }, step.delay);
-            });
-        }
-
         function showResults(data) {
+            stopLoadingTicker();
             loadingPanel.style.display = 'none';
             uploadPanel.style.display = 'none';
             resultsPanel.style.display = 'flex';
@@ -1606,6 +1903,7 @@
         }
 
         function resetAnalyzer() {
+            stopLoadingTicker();
             resultsPanel.style.display = 'none';
             loadingPanel.style.display = 'none';
             document.getElementById('header-reset-btn').style.display = 'none';
