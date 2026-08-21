@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-08-21T12:30:00Z",
+  "engine_version": "1.0.0-legacy",
+  "baseline_metrics": {
+    "test_suite": "tests/test_agent.py",
+    "total_tests": 8,
+    "passed": 8,
+    "failed": 0,
+    "execution_time_seconds": 201.5,
+    "memory_hotspots": [
+      "Per-test instantiations of spacy en_core_web_trf in setUp()",
+      "Per-test instantiations of SentenceTransformer all-mpnet-base-v2 in setUp()",
+      "Request-time MinHashLSH construction per query"
+    ]
+  },
+  "baseline_accuracy_observations": {
+    "verbatim_detection": "Jaccard similarity on 5-gram word shingles",
+    "semantic_detection": "Cosine similarity on all-mpnet-base-v2 sentence embeddings",
+    "citation_handling": "Basic regex on first author last name, DOI, and 5-word title prefix",
+    "index_persistence": "None (rebuilt on each query)",
+    "passage_segmentation": "Full abstract / sentence level only"
+  },
+  "frozen_benchmark_cases": [
+    {
+      "id": "case_exact_copy",
+      "type": "EXACT_COPY",
+      "query_text": "Patients with diabetic retinopathy were treated with ranibizumab. The clinical trial showed significant improvements in visual acuity.",
+      "expected_match": true
+    },
+    {
+      "id": "case_paraphrase",
+      "type": "LIKELY_PARAPHRASE",
+      "query_text": "Individuals suffering from diabetic ocular disorders received ranibizumab therapy, resulting in marked enhancements in sight measurements.",
+      "expected_match": true
+    },
+    {
+      "id": "case_unrelated",
+      "type": "UNRELATED",
+      "query_text": "Water purification using gravity filtering systems in remote locations demonstrates durable mechanical stability.",
+      "expected_match": false
+    }
+  ]
+}

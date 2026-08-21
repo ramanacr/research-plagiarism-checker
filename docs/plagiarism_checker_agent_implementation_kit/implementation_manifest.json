@@ -1,0 +1,52 @@
+{
+  "project": "Plagiarism Checker Agent",
+  "language": "Python",
+  "current_sources": [
+    "PubMed",
+    "Europe PMC"
+  ],
+  "baseline_embedding_model": "sentence-transformers/all-mpnet-base-v2",
+  "required_architecture": [
+    "provider abstraction",
+    "rights layer",
+    "passage-level persistent lexical index",
+    "persistent dense ANN index",
+    "hybrid retrieval",
+    "multi-signal matching",
+    "citation/reference handling",
+    "scientific boilerplate suppression",
+    "versioned scoring thresholds",
+    "labeled benchmark"
+  ],
+  "recommended_next_sources": [
+    "PMC Open Access",
+    "Crossref",
+    "OpenAlex",
+    "Unpaywall",
+    "arXiv",
+    "CORE",
+    "DOAJ"
+  ],
+  "documents": [
+    "00_README.md",
+    "01_CODING_AGENT_INSTRUCTIONS.md",
+    "02_TARGET_ARCHITECTURE.md",
+    "03_ADR_ARCHITECTURE_DECISIONS.md",
+    "04_PYTHON_MODULE_DESIGN.md",
+    "05_INGESTION_AND_INDEXING.md",
+    "06_HYBRID_RETRIEVAL_AND_MATCHING.md",
+    "07_SCORING_AND_CLASSIFICATION.md",
+    "08_SOURCE_PROVIDER_STRATEGY.md",
+    "09_DATA_MODEL_AND_STORAGE.md",
+    "10_CONFIGURATION.md",
+    "11_TESTING_AND_EVALUATION.md",
+    "12_OBSERVABILITY_AND_OPERATIONS.md",
+    "13_SECURITY_AND_CONTENT_RIGHTS.md",
+    "14_IMPLEMENTATION_PHASES.md",
+    "15_ACCEPTANCE_CRITERIA.md",
+    "16_MIGRATION_FROM_CURRENT_ENGINE.md",
+    "17_API_AND_REPORT_CONTRACTS.md",
+    "18_RISK_REGISTER.md",
+    "SOURCE_CURRENT_ROADMAP.md"
+  ]
+}
