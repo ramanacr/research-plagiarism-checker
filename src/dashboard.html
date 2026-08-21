@@ -1016,6 +1016,199 @@
             z-index: 2200;
             color: var(--text-main);
         }
+
+        /* Classification Legend Bar & Tooltips */
+        .legend-card {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .legend-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .legend-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .legend-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .legend-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .legend-badge.active-filter {
+            outline: 2px solid var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        /* Tooltip inside legend badge */
+        .legend-badge .legend-tooltip {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 260px;
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 11.5px;
+            font-weight: 400;
+            line-height: 1.45;
+            z-index: 2500;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            pointer-events: none;
+            text-align: left;
+        }
+
+        .legend-badge .legend-tooltip strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+
+        .legend-badge:hover .legend-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Grouping & Filtering Toolbar */
+        .grouping-toolbar {
+            background: var(--toggle-bg);
+            border: 1px solid var(--toggle-border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .toolbar-select, .toolbar-input {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .toolbar-input {
+            min-width: 180px;
+            cursor: text;
+        }
+
+        .toolbar-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .toolbar-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Group Accordion */
+        .group-accordion {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 14px;
+            overflow: hidden;
+            transition: border-color 0.2s ease;
+        }
+
+        .group-accordion:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .group-header {
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.02);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            border-bottom: 1px solid transparent;
+        }
+
+        .group-header.open {
+            border-bottom-color: var(--border-color);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .group-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .group-chevron {
+            transition: transform 0.2s ease;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .group-header.open .group-chevron {
+            transform: rotate(90deg);
+        }
+
+        .group-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
     </style>
 </head>
 <body>
@@ -1199,16 +1392,65 @@
                 </div>
             </div>
 
+            <!-- Interactive Classification Legend Bar -->
+            <div class="legend-card" id="tour-legends-card">
+                <div class="legend-header">
+                    <div style="font-size: 13px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                        <span>🏷️ Evidence Classification Legends</span>
+                        <button class="info-btn">i<span class="info-popover"><strong>10-Class Match Evidence Matrix</strong><span>Hover over any badge to view its exact classification criteria and plagiarism implication. Click a badge to filter results.</span></span></button>
+                    </div>
+                    <button type="button" id="reset-legend-filter-btn" class="toolbar-btn" style="display: none; padding: 4px 10px; font-size: 11px;" onclick="setLegendFilter('ALL')">Clear Filter (Show All)</button>
+                </div>
+                <div class="legend-grid" id="legend-badges-container">
+                    <!-- Badges with interactive tooltips rendered dynamically -->
+                </div>
+            </div>
+
+            <!-- Smart Results Grouping & Filter Toolbar -->
+            <div class="grouping-toolbar" id="tour-grouping-bar">
+                <div class="toolbar-group">
+                    <span>📑 Group by:</span>
+                    <select id="group-by-select" class="toolbar-select" onchange="handleGroupingChange()">
+                        <option value="doi" selected>DOI (Publication)</option>
+                        <option value="provider">Source Provider (PubMed, PMC OA, Crossref, etc.)</option>
+                        <option value="legend">Classification Legend</option>
+                        <option value="pmid">PMID (PubMed ID)</option>
+                        <option value="pmcid">PMCID (PMC ID)</option>
+                        <option value="none">Flat Match List (No Grouping)</option>
+                    </select>
+                </div>
+
+                <div class="toolbar-group">
+                    <span>🔍 Search:</span>
+                    <input type="text" id="match-search-input" class="toolbar-input" placeholder="Filter by DOI, author, journal, phrase..." oninput="handleSearchChange()">
+                </div>
+
+                <div class="toolbar-group">
+                    <span>Sort by:</span>
+                    <select id="sort-by-select" class="toolbar-select" onchange="handleGroupingChange()">
+                        <option value="similarity">Highest Similarity</option>
+                        <option value="overlap">Highest Exact Overlap</option>
+                        <option value="confidence">Confidence Score</option>
+                        <option value="year">Newest Publication</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="toolbar-btn" onclick="toggleAllGroups(true)">Expand All</button>
+                    <button type="button" class="toolbar-btn" onclick="toggleAllGroups(false)">Collapse All</button>
+                </div>
+            </div>
+
             <!-- Tabbed Comparison lists -->
             <div class="glass-card" id="tour-tabs-card">
                 <div class="tab-menu">
                     <button class="tab-btn active" onclick="switchTab(event, 'semantic-tab')">
-                        Semantic Paraphrasing Check (<span id="count-semantic">0</span>)
-                        <button class="info-btn" style="margin-left: 4px;">i<span class="info-popover"><strong>Dense Vector Paraphrasing</strong><span>Detects restated ideas with cosine similarity >= 0.85 using SentenceTransformers.</span></span></button>
+                        Suspicious Plagiarism & Paraphrasing (<span id="count-semantic">0</span>)
+                        <button class="info-btn" style="margin-left: 4px;">i<span class="info-popover"><strong>Suspicious Overlaps</strong><span>Passages classified as Exact Copy, Near Exact Copy, Likely Paraphrase, or Possible Paraphrase requiring review.</span></span></button>
                     </button>
                     <button class="tab-btn" onclick="switchTab(event, 'verbatim-tab')">
-                        Verbatim Text Copying (<span id="count-verbatim">0</span>)
-                        <button class="info-btn" style="margin-left: 4px;">i<span class="info-popover"><strong>Verbatim Overlap</strong><span>Detects identical sequences of 7+ consecutive matching words (n-gram shingling).</span></span></button>
+                        All Retrieved Evidence & Sources (<span id="count-verbatim">0</span>)
+                        <button class="info-btn" style="margin-left: 4px;">i<span class="info-popover"><strong>Complete Evidence Breakdown</strong><span>All matched candidate passages including properly quoted citations and common biomedical phrases.</span></span></button>
                     </button>
                 </div>
 
@@ -1246,32 +1488,46 @@
             </div>
             <div class="help-modal-body">
                 <div style="display: flex; gap: 12px; align-items: center;">
-                    <input type="text" id="help-search-input" class="help-search-box" placeholder="Search feature (e.g. Paraphrase, Verbatim, Privacy, Risk Index)..." onkeyup="filterHelpTopics()">
+                    <input type="text" id="help-search-input" class="help-search-box" placeholder="Search feature (e.g. Paraphrase, Grouping, DOI, Legend, Privacy, Coverage)..." onkeyup="filterHelpTopics()">
                     <button class="btn" onclick="closeHelpModal(); startTour();" style="white-space: nowrap; padding: 0.75rem 1.25rem;">
                         Start Tour
                     </button>
                 </div>
                 
                 <div class="help-guide-grid" id="help-topics-container">
-                    <div class="help-topic-item" data-keywords="overall risk assessment percentage similarity low moderate high">
+                    <div class="help-topic-item" data-keywords="overall risk assessment percentage similarity low moderate high coverage non-overlapping">
                         <div class="help-topic-title" style="font-weight: 700; color: var(--primary);">
-                            <span>Overall Risk Assessment</span>
+                            <span>Overall Risk Assessment & Span Coverage</span>
                         </div>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45;">Calculates cumulative sentence overlap and semantic similarity against peer-reviewed articles from PubMed and Europe PMC.</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45;">Calculates non-overlapping geometric span coverage across query passages without double-counting, assessing Low (&lt;15%), Moderate (15-30%), or High Risk (&gt;30%).</p>
                     </div>
 
-                    <div class="help-topic-item" data-keywords="semantic paraphrasing sentence transformer dense vector cosine similarity">
+                    <div class="help-topic-item" data-keywords="classification legend exact copy paraphrase boilerplate quoted cited matrix tooltip">
+                        <div class="help-topic-title" style="font-weight: 700; color: var(--primary);">
+                            <span>10-Class Match Evidence Matrix</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45;">Distinguishes verbatim copies and semantic paraphrases from legitimate quoted citations, referenced text, and standard scientific methodology boilerplate.</p>
+                    </div>
+
+                    <div class="help-topic-item" data-keywords="grouping group by doi source provider pmid pmcid legend filter sort">
+                        <div class="help-topic-title" style="font-weight: 700; color: var(--primary);">
+                            <span>Multi-Key Results Grouping</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45;">Organize matches by DOI, Source Provider, Classification Legend, PMID, or PMCID with collapsible accordions and real-time search.</p>
+                    </div>
+
+                    <div class="help-topic-item" data-keywords="semantic paraphrasing sentence transformer dense vector cosine similarity mpnet">
                         <div class="help-topic-title" style="font-weight: 700; color: var(--primary);">
                             <span>Semantic Paraphrasing Check</span>
                         </div>
                         <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45;">Uses all-mpnet-base-v2 neural embeddings to find conceptual paraphrases and heavily rewritten sentences from published literature.</p>
                     </div>
 
-                    <div class="help-topic-item" data-keywords="verbatim copy paste n-gram shingling exact matching">
+                    <div class="help-topic-item" data-keywords="verbatim copy paste n-gram shingling exact matching lcs phrase">
                         <div class="help-topic-title" style="font-weight: 700; color: var(--primary);">
                             <span>Verbatim Text Copying</span>
                         </div>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45;">Detects exact word-for-word duplication (7+ consecutive identical words) and displays side-by-side snippet comparisons.</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45;">Detects exact word-for-word duplication (7+ consecutive identical words) and displays side-by-side snippet comparisons with longest common substring highlighting.</p>
                     </div>
 
                     <div class="help-topic-item" data-keywords="data privacy leak audit memory sandboxing confidential">
@@ -1279,6 +1535,13 @@
                             <span>Data Privacy & Leak Audit</span>
                         </div>
                         <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45;">Audits all outbound queries to prove that proprietary paper contents remain in RAM and are never leaked to external servers.</p>
+                    </div>
+
+                    <div class="help-topic-item" data-keywords="scholarly providers pubmed europe pmc pmc oa crossref openalex arxiv unpaywall">
+                        <div class="help-topic-title" style="font-weight: 700; color: var(--primary);">
+                            <span>7 Scholarly Discovery Repositories</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45;">Cross-checks manuscripts across PubMed, Europe PMC, PMC Open Access, Crossref, OpenAlex, arXiv, and Unpaywall with fail-closed rights compliance.</p>
                     </div>
                 </div>
             </div>
@@ -1546,8 +1809,78 @@
             });
         }
 
+        // Classification Legend Definitions & Criteria Tooltips
+        const CLASSIFICATION_LEGENDS = {
+            'EXACT_COPY': {
+                name: 'Exact Copy',
+                color: 'var(--danger)',
+                bg: 'var(--danger-glow)',
+                tooltip: '<strong>🔴 EXACT COPY (Suspicious)</strong>Direct word-for-word duplication (7+ consecutive identical words or 100% token overlap) without citation or quotation marks.'
+            },
+            'NEAR_EXACT_COPY': {
+                name: 'Near Exact Copy',
+                color: 'var(--warning)',
+                bg: 'var(--warning-glow)',
+                tooltip: '<strong>🟠 NEAR EXACT COPY (Suspicious)</strong>Nearly identical passage structure with minor synonym substitutions, token insertions, or slight reordering (>= 70% exact token overlap).'
+            },
+            'LIKELY_PARAPHRASE': {
+                name: 'Likely Paraphrase',
+                color: '#f59e0b',
+                bg: 'rgba(245, 158, 11, 0.15)',
+                tooltip: '<strong>🟡 LIKELY PARAPHRASE (Suspicious)</strong>Substantially rephrased content preserving core semantic concepts with high neural cosine similarity (>= 85%) via SBERT MPNet.'
+            },
+            'POSSIBLE_PARAPHRASE': {
+                name: 'Possible Paraphrase',
+                color: '#eab308',
+                bg: 'rgba(234, 179, 8, 0.15)',
+                tooltip: '<strong>🟡 POSSIBLE PARAPHRASE (Review Recommended)</strong>Moderate semantic similarity (>= 75%) or shared technical sentence structure warranting manual editorial review.'
+            },
+            'COMMON_PHRASE': {
+                name: 'Common Phrase',
+                color: 'var(--primary)',
+                bg: 'var(--primary-glow)',
+                tooltip: '<strong>🔵 COMMON PHRASE (Standard Science)</strong>Standard biomedical terminology, laboratory methods, or standard ethics boilerplate (e.g. "written informed consent was obtained"). Suppressed from plagiarism penalty.'
+            },
+            'PROPERLY_QUOTED': {
+                name: 'Properly Quoted',
+                color: 'var(--success)',
+                bg: 'var(--success-glow)',
+                tooltip: '<strong>🟢 PROPERLY QUOTED (Attributed)</strong>Passage enclosed within quotation marks and referenced with formal citation attribution. Zero plagiarism penalty applied.'
+            },
+            'CITED_OVERLAP': {
+                name: 'Cited Overlap',
+                color: '#10b981',
+                bg: 'rgba(16, 185, 129, 0.15)',
+                tooltip: '<strong>🟢 CITED OVERLAP (Attributed)</strong>Overlapping source text where the author explicitly includes inline citations, matching DOIs, or author surname references.'
+            },
+            'REFERENCE_ONLY': {
+                name: 'Reference Only',
+                color: '#8b5cf6',
+                bg: 'rgba(139, 92, 246, 0.15)',
+                tooltip: '<strong>🟣 REFERENCE ONLY (Non-Penalty)</strong>Overlapping text located exclusively in the bibliography or reference list section.'
+            },
+            'LOW_SIGNIFICANCE': {
+                name: 'Low Significance',
+                color: 'var(--text-muted)',
+                bg: 'rgba(255, 255, 255, 0.05)',
+                tooltip: '<strong>⚪ LOW SIGNIFICANCE</strong>Incidental or brief fragment match below statistical significance threshold.'
+            },
+            'UNRELATED': {
+                name: 'Unrelated',
+                color: 'var(--text-muted)',
+                bg: 'rgba(255, 255, 255, 0.03)',
+                tooltip: '<strong>⚪ UNRELATED</strong>Candidate passages discarded below minimal similarity bounds.'
+            }
+        };
+
+        let currentPlagiarismReportData = null;
+        let currentLegendFilter = 'ALL';
+
         function showResultsV2(data, fileName) {
             stopLoadingTicker();
+            currentPlagiarismReportData = data;
+            currentLegendFilter = 'ALL';
+            
             loadingPanel.style.display = 'none';
             uploadPanel.style.display = 'none';
             resultsPanel.style.display = 'flex';
@@ -1605,96 +1938,322 @@
                 keywordsDiv.appendChild(span);
             });
 
-            const matches = data.matches || [];
-            const suspiciousMatches = matches.filter(m => ['EXACT_COPY', 'NEAR_EXACT_COPY', 'LIKELY_PARAPHRASE', 'POSSIBLE_PARAPHRASE'].includes(m.classification));
-            const nonSuspiciousMatches = matches.filter(m => !['EXACT_COPY', 'NEAR_EXACT_COPY', 'LIKELY_PARAPHRASE', 'POSSIBLE_PARAPHRASE'].includes(m.classification));
+            // Render Legends Bar with interactive tooltips & match counts
+            renderLegendBadges();
 
-            document.getElementById('count-semantic').innerText = suspiciousMatches.length;
-            document.getElementById('count-verbatim').innerText = nonSuspiciousMatches.length;
+            // Render Grouped Matches
+            renderAllTabsContent();
+        }
 
-            // Render Tab 1 (Suspicious Matches)
-            const semDiv = document.getElementById('semantic-matches-list');
-            semDiv.innerHTML = '';
-            if (suspiciousMatches.length === 0) {
-                semDiv.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🛡️</div>
-                        <h4>Zero Suspicious Plagiarism Detected</h4>
-                        <p>No uncited exact copies or heavy paraphrasing detected across PubMed, Europe PMC, PMC OA, Crossref, OpenAlex, arXiv, and Unpaywall.</p>
-                    </div>`;
-            } else {
-                semDiv.innerHTML = renderMatchCards(suspiciousMatches, 'Suspicious Matches (Requires Review)', true);
-            }
+        function renderLegendBadges() {
+            const container = document.getElementById('legend-badges-container');
+            if (!container) return;
+            container.innerHTML = '';
 
-            // Render Tab 2 (All Evidence & Common Phrases)
-            const verbDiv = document.getElementById('verbatim-matches-list');
-            verbDiv.innerHTML = '';
-            if (matches.length === 0) {
-                verbDiv.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">✓</div>
-                        <h4>No Overlapping Passages Found</h4>
-                        <p>Document exhibits clean original passage structure with no database matches.</p>
-                    </div>`;
-            } else {
-                verbDiv.innerHTML = renderMatchCards(matches, 'All Retrieved Evidence & Matches', false);
+            const matches = (currentPlagiarismReportData && currentPlagiarismReportData.matches) ? currentPlagiarismReportData.matches : [];
+            const countByCls = {};
+            matches.forEach(m => {
+                const c = m.classification || 'UNKNOWN';
+                countByCls[c] = (countByCls[c] || 0) + 1;
+            });
+
+            Object.keys(CLASSIFICATION_LEGENDS).forEach(clsKey => {
+                const info = CLASSIFICATION_LEGENDS[clsKey];
+                const count = countByCls[clsKey] || 0;
+                const badge = document.createElement('div');
+                badge.className = 'legend-badge' + (currentLegendFilter === clsKey ? ' active-filter' : '');
+                badge.style.background = info.bg;
+                badge.style.color = info.color;
+                badge.style.borderColor = info.color;
+                badge.onclick = () => setLegendFilter(clsKey);
+
+                badge.innerHTML = `
+                    <span>${info.name}</span>
+                    <span style="background: rgba(0,0,0,0.25); border-radius: 10px; padding: 1px 6px; font-size: 10px;">${count}</span>
+                    <div class="legend-tooltip">
+                        ${info.tooltip}
+                        <div style="margin-top: 6px; font-size: 10.5px; opacity: 0.85;"><b>Click badge</b> to filter matches by this class.</div>
+                    </div>
+                `;
+                container.appendChild(badge);
+            });
+
+            const resetBtn = document.getElementById('reset-legend-filter-btn');
+            if (resetBtn) {
+                resetBtn.style.display = currentLegendFilter === 'ALL' ? 'none' : 'inline-block';
             }
         }
 
-        function renderMatchCards(matchesList, title, isSuspiciousOnly) {
-            let html = `<h4 style="margin: 24px 0 12px 0; color: ${isSuspiciousOnly ? 'var(--warning)' : 'var(--primary)'}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${title} (${matchesList.length})</h4>`;
-            matchesList.forEach(m => {
-                const cls = m.classification || 'UNKNOWN';
-                let badgeColor = 'var(--text-muted)';
-                let badgeBg = 'rgba(255,255,255,0.05)';
-                if (cls === 'EXACT_COPY') { badgeColor = 'var(--danger)'; badgeBg = 'var(--danger-glow)'; }
-                else if (cls === 'NEAR_EXACT_COPY' || cls === 'LIKELY_PARAPHRASE') { badgeColor = 'var(--warning)'; badgeBg = 'var(--warning-glow)'; }
-                else if (cls === 'PROPERLY_QUOTED' || cls === 'CITED_OVERLAP') { badgeColor = 'var(--success)'; badgeBg = 'var(--success-glow)'; }
-                else if (cls === 'COMMON_PHRASE') { badgeColor = 'var(--primary)'; badgeBg = 'var(--primary-glow)'; }
+        function setLegendFilter(clsKey) {
+            currentLegendFilter = (currentLegendFilter === clsKey && clsKey !== 'ALL') ? 'ALL' : clsKey;
+            renderLegendBadges();
+            renderAllTabsContent();
+        }
 
-                const prov = (m.source && m.source.provider) ? m.source.provider.toUpperCase() : 'SCHOLARLY SOURCE';
-                const authors = (m.source && m.source.authors && m.source.authors.length) ? m.source.authors.slice(0, 2).join(', ') : 'Unknown Authors';
-                const journal = (m.source && m.source.journal) ? m.source.journal : '';
-                const year = (m.source && m.source.year) ? '(' + m.source.year + ')' : '';
-                const doi = (m.source && m.source.doi) ? m.source.doi : null;
-                const pmid = (m.source && m.source.pmid) ? m.source.pmid : null;
-                const longestPhrase = (m.evidence && m.evidence.longest_copied_phrase) ? m.evidence.longest_copied_phrase : null;
-                const semScore = m.evidence && m.evidence.semantic_similarity ? Math.round(m.evidence.semantic_similarity * 100) + '%' : 'N/A';
-                const exactOverlap = m.evidence && m.evidence.exact_overlap ? Math.round(m.evidence.exact_overlap * 100) + '%' : '0%';
+        function handleGroupingChange() {
+            renderAllTabsContent();
+        }
+
+        function handleSearchChange() {
+            renderAllTabsContent();
+        }
+
+        function toggleAllGroups(openState) {
+            document.querySelectorAll('.group-header').forEach(header => {
+                const body = header.nextElementSibling;
+                if (openState) {
+                    header.classList.add('open');
+                    if (body) body.style.display = 'flex';
+                } else {
+                    header.classList.remove('open');
+                    if (body) body.style.display = 'none';
+                }
+            });
+        }
+
+        function toggleAccordion(header) {
+            header.classList.toggle('open');
+            const body = header.nextElementSibling;
+            if (body) {
+                body.style.display = header.classList.contains('open') ? 'flex' : 'none';
+            }
+        }
+
+        function renderAllTabsContent() {
+            if (!currentPlagiarismReportData) return;
+            const matches = currentPlagiarismReportData.matches || [];
+            
+            const suspiciousMatches = matches.filter(m => ['EXACT_COPY', 'NEAR_EXACT_COPY', 'LIKELY_PARAPHRASE', 'POSSIBLE_PARAPHRASE'].includes(m.classification));
+            const allMatches = matches;
+
+            document.getElementById('count-semantic').innerText = suspiciousMatches.length;
+            document.getElementById('count-verbatim').innerText = allMatches.length;
+
+            // Render Tab 1 (Suspicious Matches)
+            const semDiv = document.getElementById('semantic-matches-list');
+            semDiv.innerHTML = renderGroupedMatches(suspiciousMatches, true);
+
+            // Render Tab 2 (All Evidence & Common Phrases)
+            const verbDiv = document.getElementById('verbatim-matches-list');
+            verbDiv.innerHTML = renderGroupedMatches(allMatches, false);
+        }
+
+        function renderGroupedMatches(matchesList, isSuspiciousOnly) {
+            const groupBy = document.getElementById('group-by-select') ? document.getElementById('group-by-select').value : 'doi';
+            const sortBy = document.getElementById('sort-by-select') ? document.getElementById('sort-by-select').value : 'similarity';
+            const searchQuery = (document.getElementById('match-search-input') ? document.getElementById('match-search-input').value : '').toLowerCase().trim();
+
+            // 1. Filter by Legend
+            let filtered = matchesList;
+            if (currentLegendFilter !== 'ALL') {
+                filtered = filtered.filter(m => m.classification === currentLegendFilter);
+            }
+
+            // 2. Filter by Search Query
+            if (searchQuery) {
+                filtered = filtered.filter(m => {
+                    const doi = (m.source && m.source.doi) ? m.source.doi.toLowerCase() : '';
+                    const pmid = (m.source && m.source.pmid) ? String(m.source.pmid) : '';
+                    const pmcid = (m.source && m.source.pmcid) ? String(m.source.pmcid).toLowerCase() : '';
+                    const provider = (m.source && m.source.provider) ? m.source.provider.toLowerCase() : '';
+                    const authors = (m.source && m.source.authors) ? m.source.authors.join(' ').toLowerCase() : '';
+                    const journal = (m.source && m.source.journal) ? m.source.journal.toLowerCase() : '';
+                    const longest = (m.evidence && m.evidence.longest_copied_phrase) ? m.evidence.longest_copied_phrase.toLowerCase() : '';
+                    const cls = (m.classification || '').toLowerCase();
+                    return doi.includes(searchQuery) || pmid.includes(searchQuery) || pmcid.includes(searchQuery) ||
+                           provider.includes(searchQuery) || authors.includes(searchQuery) || journal.includes(searchQuery) ||
+                           longest.includes(searchQuery) || cls.includes(searchQuery);
+                });
+            }
+
+            if (filtered.length === 0) {
+                if (isSuspiciousOnly) {
+                    return `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🛡️</div>
+                            <h4>Zero Suspicious Overlaps Found</h4>
+                            <p>No uncited exact copies or heavy paraphrasing matches match the current filter criteria.</p>
+                        </div>`;
+                } else {
+                    return `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✓</div>
+                            <h4>No Matches Found</h4>
+                            <p>No evidence matches match your selected legend or search filters.</p>
+                        </div>`;
+                }
+            }
+
+            // 3. Sort Matches
+            filtered.sort((a, b) => {
+                if (sortBy === 'similarity') {
+                    return (b.evidence?.semantic_similarity || 0) - (a.evidence?.semantic_similarity || 0);
+                } else if (sortBy === 'overlap') {
+                    return (b.evidence?.exact_overlap || 0) - (a.evidence?.exact_overlap || 0);
+                } else if (sortBy === 'confidence') {
+                    return (b.confidence || 0) - (a.confidence || 0);
+                } else if (sortBy === 'year') {
+                    return (b.source?.year || 0) - (a.source?.year || 0);
+                }
+                return 0;
+            });
+
+            // 4. Flat list mode
+            if (groupBy === 'none') {
+                let html = `<div style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">`;
+                filtered.forEach(m => {
+                    html += renderSingleMatchCard(m);
+                });
+                html += `</div>`;
+                return html;
+            }
+
+            // 5. Grouped Map
+            const groups = new Map();
+            filtered.forEach(m => {
+                let key = 'Uncategorized';
+                let titleHtml = '';
+                let groupType = '';
+
+                if (groupBy === 'doi') {
+                    groupType = 'DOI';
+                    if (m.source && m.source.doi) {
+                        key = m.source.doi;
+                        titleHtml = `DOI: <a href="https://doi.org/${m.source.doi}" target="_blank" style="color:var(--primary);text-decoration:none;font-weight:700;" onclick="event.stopPropagation();">${m.source.doi}</a>`;
+                    } else {
+                        key = 'No DOI (' + ((m.source && m.source.provider) || 'Source').toUpperCase() + ')';
+                        titleHtml = key;
+                    }
+                } else if (groupBy === 'provider') {
+                    groupType = 'Provider';
+                    key = ((m.source && m.source.provider) || 'Unknown Provider').toUpperCase();
+                    titleHtml = `Provider: <strong>${key}</strong>`;
+                } else if (groupBy === 'legend') {
+                    groupType = 'Legend';
+                    const leg = CLASSIFICATION_LEGENDS[m.classification];
+                    key = m.classification || 'UNKNOWN';
+                    titleHtml = `Evidence Class: <strong>${leg ? leg.name : key}</strong>`;
+                } else if (groupBy === 'pmid') {
+                    groupType = 'PMID';
+                    if (m.source && m.source.pmid) {
+                        key = 'PMID: ' + m.source.pmid;
+                        titleHtml = `<a href="https://pubmed.ncbi.nlm.nih.gov/${m.source.pmid}" target="_blank" style="color:var(--primary);text-decoration:none;font-weight:700;" onclick="event.stopPropagation();">PMID: ${m.source.pmid}</a>`;
+                    } else {
+                        key = 'No PMID';
+                        titleHtml = 'No PMID Associated';
+                    }
+                } else if (groupBy === 'pmcid') {
+                    groupType = 'PMCID';
+                    if (m.source && m.source.pmcid) {
+                        key = 'PMCID: ' + m.source.pmcid;
+                        titleHtml = `PMCID: <strong>${m.source.pmcid}</strong>`;
+                    } else {
+                        key = 'No PMCID';
+                        titleHtml = 'No PMCID Associated';
+                    }
+                }
+
+                if (!groups.has(key)) {
+                    groups.set(key, { titleHtml, matches: [] });
+                }
+                groups.get(key).matches.push(m);
+            });
+
+            let html = `<div style="margin-top: 14px;">`;
+            groups.forEach((groupData, gKey) => {
+                const gMatches = groupData.matches;
+                let maxSim = 0;
+                let topCls = gMatches[0]?.classification || 'UNKNOWN';
+                gMatches.forEach(m => {
+                    const sim = m.evidence?.semantic_similarity || 0;
+                    if (sim > maxSim) {
+                        maxSim = sim;
+                        topCls = m.classification;
+                    }
+                });
+
+                const topLegend = CLASSIFICATION_LEGENDS[topCls] || { color: 'var(--text-muted)', bg: 'rgba(255,255,255,0.05)', name: topCls };
 
                 html += `
-                    <div class="match-card">
-                        <div class="match-header">
-                            <h4 class="match-title">[${prov}] ${m.source_document_id || 'Scholarly Publication'}</h4>
+                    <div class="group-accordion">
+                        <div class="group-header open" onclick="toggleAccordion(this)">
+                            <div class="group-title-wrapper">
+                                <span class="group-chevron">&#9654;</span>
+                                <span style="font-size: 13px; font-weight: 600; color: var(--text-main);">${groupData.titleHtml}</span>
+                            </div>
                             <div style="display: flex; gap: 8px; align-items: center;">
-                                <span class="match-score-badge" style="background: ${badgeBg}; color: ${badgeColor}; border-color: ${badgeColor}">
-                                    ${cls.replace(/_/g, ' ')}
+                                <span style="background: ${topLegend.bg}; color: ${topLegend.color}; border: 1px solid ${topLegend.color}; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">
+                                    ${topLegend.name}
                                 </span>
-                                <span class="match-score-badge" style="background: var(--primary-glow); color: var(--primary);">
-                                    ${semScore} Semantic
+                                <span style="background: var(--toggle-bg); border: 1px solid var(--border-color); color: var(--text-muted); padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">
+                                    ${gMatches.length} ${gMatches.length === 1 ? 'passage' : 'passages'}
+                                </span>
+                                <span style="background: var(--primary-glow); color: var(--primary); padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">
+                                    Max: ${Math.round(maxSim * 100)}%
                                 </span>
                             </div>
                         </div>
-                        <div class="match-details">
-                            <span><b>Authors:</b> ${authors}</span>
-                            ${journal ? `<span><b>Journal:</b> ${journal} ${year}</span>` : ''}
-                            ${pmid ? `<span><b>PMID:</b> ${pmid}</span>` : ''}
-                            ${doi ? `<span><b>DOI:</b> <a href="https://doi.org/${doi}" target="_blank" style="color:var(--primary);text-decoration:none;">${doi}</a></span>` : ''}
-                        </div>
-                        ${longestPhrase ? `
-                            <div class="sentence-box" style="margin-top: 10px;">
-                                <div class="sentence-box-label">Longest Common Contiguous Phrase (${exactOverlap} exact token overlap)</div>
-                                <div class="sentence-text highlight-text">"${longestPhrase}"</div>
-                            </div>` : ''}
-                        <div style="display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); margin-top: 8px;">
-                            <span>Confidence: ${Math.round((m.confidence || 0) * 100)}%</span>
-                            <span>Exact Overlap: ${exactOverlap}</span>
-                            <span>Boilerplate Score: ${m.evidence ? m.evidence.boilerplate_score : 0}</span>
+                        <div class="group-body" style="display: flex;">
+                `;
+
+                gMatches.forEach(m => {
+                    html += renderSingleMatchCard(m);
+                });
+
+                html += `
                         </div>
                     </div>
                 `;
             });
+            html += `</div>`;
             return html;
+        }
+
+        function renderSingleMatchCard(m) {
+            const cls = m.classification || 'UNKNOWN';
+            const leg = CLASSIFICATION_LEGENDS[cls] || { color: 'var(--text-muted)', bg: 'rgba(255,255,255,0.05)', name: cls };
+
+            const prov = (m.source && m.source.provider) ? m.source.provider.toUpperCase() : 'SCHOLARLY SOURCE';
+            const authors = (m.source && m.source.authors && m.source.authors.length) ? m.source.authors.slice(0, 2).join(', ') : 'Unknown Authors';
+            const journal = (m.source && m.source.journal) ? m.source.journal : '';
+            const year = (m.source && m.source.year) ? '(' + m.source.year + ')' : '';
+            const doi = (m.source && m.source.doi) ? m.source.doi : null;
+            const pmid = (m.source && m.source.pmid) ? m.source.pmid : null;
+            const longestPhrase = (m.evidence && m.evidence.longest_copied_phrase) ? m.evidence.longest_copied_phrase : null;
+            const semScore = m.evidence && m.evidence.semantic_similarity ? Math.round(m.evidence.semantic_similarity * 100) + '%' : 'N/A';
+            const exactOverlap = m.evidence && m.evidence.exact_overlap ? Math.round(m.evidence.exact_overlap * 100) + '%' : '0%';
+
+            return `
+                <div class="match-card">
+                    <div class="match-header">
+                        <h4 class="match-title">[${prov}] ${m.source_document_id || 'Scholarly Publication'}</h4>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span class="match-score-badge" style="background: ${leg.bg}; color: ${leg.color}; border-color: ${leg.color}">
+                                ${leg.name}
+                            </span>
+                            <span class="match-score-badge" style="background: var(--primary-glow); color: var(--primary);">
+                                ${semScore} Semantic
+                            </span>
+                        </div>
+                    </div>
+                    <div class="match-details">
+                        <span><b>Authors:</b> ${authors}</span>
+                        ${journal ? `<span><b>Journal:</b> ${journal} ${year}</span>` : ''}
+                        ${pmid ? `<span><b>PMID:</b> <a href="https://pubmed.ncbi.nlm.nih.gov/${pmid}" target="_blank" style="color:var(--primary);text-decoration:none;">${pmid}</a></span>` : ''}
+                        ${doi ? `<span><b>DOI:</b> <a href="https://doi.org/${doi}" target="_blank" style="color:var(--primary);text-decoration:none;">${doi}</a></span>` : ''}
+                    </div>
+                    ${longestPhrase ? `
+                        <div class="sentence-box" style="margin-top: 10px;">
+                            <div class="sentence-box-label">Longest Common Contiguous Phrase (${exactOverlap} exact token overlap)</div>
+                            <div class="sentence-text highlight-text">"${longestPhrase}"</div>
+                        </div>` : ''}
+                    <div style="display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+                        <span>Confidence: ${Math.round((m.confidence || 0) * 100)}%</span>
+                        <span>Exact Overlap: ${exactOverlap}</span>
+                        <span>Boilerplate Score: ${m.evidence ? m.evidence.boilerplate_score : 0}</span>
+                    </div>
+                </div>
+            `;
         }
 
         function showResults(data) {
@@ -1996,23 +2555,33 @@
         const PLAGIARISM_TOUR_STEPS = [
             {
                 targetId: "drop-zone",
-                title: "1. Confidential Upload",
-                body: "Upload your research paper (.pdf, .docx, .txt). The file is processed strictly in memory and is never saved to disk or shared."
+                title: "1. Confidential Upload & Engine Switcher",
+                body: "Upload your research paper (.pdf, .docx, .txt). Choose Engine v2.0 for multi-channel retrieval across 7 scholarly repositories with 10-class calibrated evidence."
             },
             {
                 targetId: "tour-risk-card",
-                title: "2. Overall Risk Assessment",
-                body: "Displays aggregate similarity percentage and security tier: Low (<15%), Moderate (15-30%), or High Risk (>30%)."
+                title: "2. Overall Risk Assessment & Span Coverage",
+                body: "Displays aggregate non-overlapping span coverage and risk tier: Low (<15%), Moderate (15-30%), or High (>30%), preventing double-counting."
             },
             {
                 targetId: "tour-audit-card",
-                title: "3. Zero-Leak Audit Log",
-                body: "Verifies the exact non-sensitive keywords sent to PubMed / Europe PMC, guaranteeing no confidential manuscript text leaves RAM."
+                title: "3. Zero-Leak Privacy Audit Log",
+                body: "Verifies the exact non-sensitive biomedical concepts sent to external APIs, guaranteeing 0 bytes of proprietary manuscript text leave RAM."
+            },
+            {
+                targetId: "tour-legends-card",
+                title: "4. 10-Class Classification Legends & Tooltips",
+                body: "Hover over any legend badge to inspect its exact classification criteria. Click any badge to instantly filter matches by that evidence category."
+            },
+            {
+                targetId: "tour-grouping-bar",
+                title: "5. Smart Grouping & Search Toolbar",
+                body: "Group matches by DOI, Source Provider, Classification Legend, PMID, or PMCID. Filter results in real-time with the instant search bar."
             },
             {
                 targetId: "tour-tabs-card",
-                title: "4. Semantic & Verbatim Tabs",
-                body: "Compare conceptual paraphrasing (SentenceTransformer dense vectors) and verbatim copy-paste overlaps (n-gram shingling) side by side."
+                title: "6. Evidence Tabs & Grouped Accordions",
+                body: "Review suspicious overlaps separately from legitimate quoted citations and common phrases with collapsible group accordions and longest phrase highlights."
             }
         ];
 
@@ -2021,7 +2590,10 @@
         function startTour() {
             const results = document.getElementById("results-panel");
             if (results.style.display === "none" || !results.style.display) {
-                results.style.display = "block";
+                results.style.display = "flex";
+            }
+            if (!currentPlagiarismReportData) {
+                renderLegendBadges();
             }
             currentPlagiarismTourIdx = 0;
             renderPlagiarismTourStep();
