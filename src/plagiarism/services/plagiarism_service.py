@@ -10,6 +10,7 @@ from src.plagiarism.config.settings import EngineConfig, get_default_config
 from src.plagiarism.documents.models import Document, Passage, SectionType
 from src.plagiarism.documents.segmentation import process_document
 from src.extractor import DocumentExtractor
+from src.plagiarism.providers.base import SourceDocument, SourceRecord
 from src.plagiarism.providers.registry import ProviderRegistry, create_default_registry
 from src.plagiarism.indexing.corpus_indexer import CorpusIndexer
 from src.plagiarism.indexing.vector.embedder import EmbeddingService
