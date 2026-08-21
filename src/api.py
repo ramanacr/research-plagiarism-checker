@@ -82,6 +82,8 @@ async def analyze_file_v2(file: UploadFile = File(...)):
         report = agent.analyze_document_v2(content, file.filename)
         return report.to_dict()
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(
             status_code=500,
             detail=f"Error in v2 plagiarism check: {str(e)}"
