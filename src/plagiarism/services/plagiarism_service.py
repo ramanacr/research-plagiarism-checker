@@ -166,40 +166,22 @@ class PlagiarismService:
 
                 # Ingest discovered records into persistent passage index
                 for rec in records:
-                    provider_inst = self.provider_registry.get(rec.provider)
-                    if provider_inst:
-                        try:
-                            source_doc = provider_inst.get_full_text(rec.source_id)
-                            if source_doc is not None and asyncio.iscoroutine(source_doc):
-                                try:
-                                    loop = asyncio.get_event_loop()
-                                    if loop.is_running():
-                                        import concurrent.futures
-                                        with concurrent.futures.ThreadPoolExecutor() as pool:
-                                            source_doc = pool.submit(asyncio.run, provider_inst.get_full_text(rec.source_id)).result()
-                                    else:
-                                        source_doc = loop.run_until_complete(source_doc)
-                                except RuntimeError:
-                                    source_doc = asyncio.run(source_doc)
-                        except Exception:
-                            source_doc = None
-                        if source_doc is None:
-                            source_doc = SourceDocument(
-                                document_id=f"{rec.provider}:{rec.source_id}",
-                                provider=rec.provider,
-                                provider_source_id=rec.source_id,
-                                doi=rec.doi,
-                                pmid=rec.pmid,
-                                pmcid=rec.pmcid,
-                                title=rec.title,
-                                abstract=rec.abstract,
-                                full_text=rec.abstract,
-                                authors=rec.authors,
-                                journal=rec.journal,
-                                publication_year=rec.publication_year,
-                                rights_id="abstract_fair_use",
-                            )
-                        self.ingestion_service.ingest_source_document(source_doc)
+                    source_doc = SourceDocument(
+                        document_id=f"{rec.provider}:{rec.source_id}",
+                        provider=rec.provider,
+                        provider_source_id=rec.source_id,
+                        doi=rec.doi,
+                        pmid=rec.pmid,
+                        pmcid=rec.pmcid,
+                        title=rec.title,
+                        abstract=rec.abstract,
+                        full_text=rec.abstract,
+                        authors=rec.authors,
+                        journal=rec.journal,
+                        publication_year=rec.publication_year,
+                        rights_id="abstract_fair_use",
+                    )
+                    self.ingestion_service.ingest_source_document(source_doc)
 
         # 3. Vector indexing of indexed corpus passages if needed
         with tracer.trace_stage("vector_indexing"):
