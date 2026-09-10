@@ -1,6 +1,8 @@
+import asyncio
 import os
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse
+from starlette.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from src.agent import ResearchGuardrailAgent
@@ -33,6 +35,8 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 # Initialize our agent locally
 # Note: On startup, this will load spaCy and SentenceTransformers
 agent = ResearchGuardrailAgent()
+# Serialize model/index mutations without blocking pages and health checks.
+analysis_gate = asyncio.Semaphore(1)
 
 @app.post("/api/analyze")
 async def analyze_file(file: UploadFile = File(...)):
@@ -54,7 +58,8 @@ async def analyze_file(file: UploadFile = File(...)):
         content = await file.read()
         
         # Run local agent analysis
-        report = agent.analyze_document(content, file.filename)
+        async with analysis_gate:
+            report = await run_in_threadpool(agent.analyze_document, content, file.filename)
         return report
     except Exception as e:
         raise HTTPException(
@@ -79,7 +84,8 @@ async def analyze_file_v2(file: UploadFile = File(...)):
         
     try:
         content = await file.read()
-        report = agent.analyze_document_v2(content, file.filename)
+        async with analysis_gate:
+            report = await run_in_threadpool(agent.analyze_document_v2, content, file.filename)
         return report.to_dict()
     except Exception as e:
         import traceback
